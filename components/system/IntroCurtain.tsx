@@ -93,20 +93,32 @@ export function IntroCurtain() {
         pointerEvents: leaving ? "none" : "auto",
       }}
     >
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- silent brand
-          title card; the wordmark is duplicated as text in the nav beneath. */}
-      <video
-        ref={videoRef}
-        src={curtain.src}
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        onEnded={dismiss}
-        /* `contain`, not `cover`: the card is 16:9 and a phone is not, and the
-           clip's own ground is this black, so it letterboxes invisibly. */
-        className="h-full w-full object-contain"
-      />
+      {/* The mark animates IN with the card and OUT as it leaves: it scales
+          up fractionally and dissolves, so the curtain hands the wordmark to
+          the nav rather than cutting to it. */}
+      <div
+        className="absolute inset-0 grid place-items-center transition-all duration-[520ms] ease-[var(--ease-drk)]"
+        style={{
+          opacity: leaving ? 0 : 1,
+          transform: leaving ? "scale(1.06)" : "scale(1)",
+          filter: leaving ? "blur(6px)" : "blur(0px)",
+        }}
+      >
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption -- silent brand
+            title card; the wordmark is duplicated as text in the nav beneath. */}
+        <video
+          ref={videoRef}
+          src={curtain.src}
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          onEnded={dismiss}
+          /* `contain`, not `cover`: the card is 16:9 and a phone is not, and
+             the clip's own ground is this black, so it letterboxes invisibly. */
+          className="drk-curtain-mark h-full w-full object-contain"
+        />
+      </div>
 
       {/* ---- Boot readout -------------------------------------------------
           Brand language, not telemetry. Driven by CSS rather than a React

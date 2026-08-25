@@ -241,7 +241,39 @@ export function CompoundingLoop() {
                 );
               })}
 
-              {/* the widening core: capacity grows with each turn */}
+              {/* THREE TURNS, EACH WIDER THAN THE LAST.
+                  The loop does not just close — it comes back around bigger.
+                  Turn 1 completes, then turn 2 opens outside it, then turn 3
+                  outside that. This is the argument the section is making,
+                  drawn rather than captioned: capacity widens each turn. */}
+              {[
+                { r: R - 9, from: 0.7, label: "Year 1" },
+                { r: R - 3, from: 0.79, label: "Year 2" },
+                { r: R + 3.5, from: 0.88, label: "Year 3" },
+              ].map((turn, i) => {
+                const c = 2 * Math.PI * turn.r;
+                return (
+                  <circle
+                    key={turn.label}
+                    cx="50"
+                    cy="50"
+                    r={turn.r}
+                    fill="none"
+                    stroke="var(--color-hero)"
+                    strokeWidth={0.34 + i * 0.12}
+                    strokeLinecap="round"
+                    transform="rotate(-90 50 50)"
+                    strokeDasharray={c}
+                    style={{
+                      strokeDashoffset: `calc(${c} * (1 - clamp(0, calc((var(--p) - ${turn.from}) / 0.1), 1)))`,
+                      opacity: 0.2 + i * 0.16,
+                      filter: "drop-shadow(0 0 2px rgba(0,255,122,0.4))",
+                    }}
+                  />
+                );
+              })}
+
+              {/* the core, accumulating capacity as the turns complete */}
               <circle
                 cx="50"
                 cy="50"

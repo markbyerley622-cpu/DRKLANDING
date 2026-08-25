@@ -2,10 +2,8 @@
 
 import { Section } from "@/components/ui/Primitives";
 import { Button } from "@/components/ui/Button";
-import { LiquidityField } from "./LiquidityField";
 import { Logo } from "./Logo";
 import { Scrub } from "@/components/system/Stage";
-import { useIsCompact } from "@/lib/scroll";
 import { closing, footer, brand, contact } from "@/content/drk";
 
 /** Telegram glyph. Inlined so the contact block costs no extra request. */
@@ -18,17 +16,19 @@ function TelegramIcon({ className }: { className?: string }) {
 }
 
 /**
- * ACT 14 — EVERYTHING COLLAPSES INTO ONE STATEMENT
+ * ACT 14 — EVERYTHING GOES BENEATH THE SURFACE
  *
- * Complexity retreats. The network lines sink beneath the surface as the
- * statement resolves, and the field keeps running quietly after the copy has
- * landed — the system does not stop because the page ended.
+ * The global Undercurrent is retreating across this act — every route the
+ * reader has travelled sinks back under. This act only deepens the dark it
+ * sinks into, and lets the statement arrive in the space left behind.
+ *
+ * A trace of the system keeps running after the copy has landed: the system
+ * does not stop because the page ended.
  *
  * Contact is deliberately prominent here: the address is shown as readable
  * text at display size, not hidden behind a button label.
  */
 export function FinalCTA() {
-  const compact = useIsCompact();
 
   return (
     <>
@@ -46,19 +46,20 @@ export function FinalCTA() {
             className="absolute inset-0"
             style={{
               background:
-                "radial-gradient(100% 80% at 50% 82%, rgba(21,23,22,0.7) 0%, rgba(8,13,12,1) 68%)",
+                "radial-gradient(100% 80% at 50% 82%, rgba(21,23,22,0.3) 0%, rgba(8,13,12,0.88) 68%)",
             }}
           />
+          {/* No local field here: the global Undercurrent is already retreating
+              beneath the surface across this act. This only deepens the dark
+              it sinks into. */}
           <div
             className="absolute inset-x-0 bottom-0 h-[58%]"
             style={{
-              // Sinks and dims as the statement takes over.
-              transform: "translate3d(0, calc(var(--p) * 12%), 0)",
-              opacity: "calc(0.8 - var(--p) * 0.42)",
+              background:
+                "linear-gradient(0deg, rgba(8,13,12,0.9), transparent)",
+              opacity: "calc(0.35 + var(--p) * 0.65)",
             }}
-          >
-            <LiquidityField intensity={compact ? 0.22 : 0.34} />
-          </div>
+          />
           <div
             className="absolute inset-x-0 bottom-0 h-1/2"
             style={{

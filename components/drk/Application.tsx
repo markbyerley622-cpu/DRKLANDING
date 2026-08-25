@@ -116,7 +116,7 @@ export function Application() {
                   composition — rail, chrome, reel, caption, payoff — has to
                   fit one pinned frame, and an aspect ratio on a 1120px panel
                   overflows it. */}
-              <div className="relative h-[clamp(190px,44svh,520px)] w-full bg-obsidian">
+              <div className="relative h-[clamp(200px,32svh,300px)] w-full bg-obsidian sm:h-[clamp(190px,44svh,520px)]">
                 {CLIPS.map((c, i) => (
                   <Clip key={c.key} clipKey={c.key} name={c.name} active={i === active} />
                 ))}
@@ -180,33 +180,63 @@ function Clip({
   active: boolean;
 }) {
   const ref = useRef<HTMLVideoElement | null>(null);
-  /* Only ever attach a src once the clip has been active — an unvisited act
-     costs one poster image, not six videos. */
+  /**
+   * Arm a clip as soon as the ACT is anywhere near the viewport, not when the
+   * clip becomes active. By the time the reader reaches a surface its video is
+   * already decoded and running, so nothing ever shows a frozen poster while
+   * it buffers — the reel is already playing when they arrive.
+   */
   const [armed, setArmed] = useState(false);
 
   useEffect(() => {
-    if (active) setArmed(true);
+    if (active) {
+      setArmed(true);
+      return;
+    }
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setArmed(true);
+          obs.disconnect();
+        }
+      },
+      // A full viewport of runway on each side: arm before arrival.
+      { rootMargin: "100% 0px 100% 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, [active]);
+
+  /* Keep armed-but-inactive clips primed at frame 0 so switching is instant. */
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || !armed || active) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    v.load();
+  }, [armed, active]);
 
   useEffect(() => {
     const v = ref.current;
-    if (!v) return;
-
+    if (!v || !armed) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     if (active) {
-      // Autoplay refusal is expected on some policies; the poster stands in.
+      // Already buffered by the time we get here, so this starts immediately.
+      // A refusal is expected under some autoplay policies; the poster — a
+      // real screenshot of the same surface — stands in.
       void v.play().catch(() => {});
     } else {
+      // Armed and decoded, but not burning a decoder while off screen.
       v.pause();
-      // Rewind so returning to this surface replays it from the top.
       try {
         v.currentTime = 0;
       } catch {
         /* seeking before metadata is harmless to skip */
       }
     }
-  }, [active]);
+  }, [active, armed]);
 
   return (
     <div
@@ -223,9 +253,19 @@ function Clip({
         muted
         loop
         playsInline
-        preload="none"
+        /* `metadata` once armed: enough to decode the first frame and start
+           without pulling the whole file before it is needed. */
+        preload={armed ? "metadata" : "none"}
         aria-label={`${name} — recorded in the live DRK application`}
-        className="h-full w-full object-cover object-top"
+        /* The recording is a wide desktop capture. `contain` on compact
+           viewports keeps the whole interface readable instead of cropping
+           the sidebar away; `cover` fills the frame on desktop where the
+           panel is already the right shape. */
+        /* A wide desktop capture in a portrait frame. `contain` letterboxed
+           it with dead space, so compact viewports crop past the app's left
+           sidebar instead — the main panel fills the frame and stays legible.
+           Desktop keeps the full composition. */
+        className="h-full w-full object-cover object-[34%_top] sm:object-top"
       />
     </div>
   );

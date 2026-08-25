@@ -24,6 +24,24 @@ Zero configuration. Import the repo and deploy — the app is fully static
 variables, or external services. Fonts are self-hosted at build time via
 `next/font`, so there are no runtime third-party requests.
 
+## The world
+
+The page is one continuous descent, not a stack of sections. Two components
+carry that:
+
+- **`Undercurrent`** — a single fixed canvas behind the entire document. The
+  same routes and signals run the whole way down, and how much of them you can
+  see is driven by document progress: barely visible at the surface, fully
+  revealed inside the runtime, retreating again at the end. This is
+  "liquidity beneath the surface" made literal. `body` is transparent so it
+  shows through; `html` keeps the ground colour.
+- **`Seam`** — the join between two acts. A path leaves the act above, carries
+  a packet across the gap, and arrives at the act below, so no act simply
+  stops and the next one starts.
+
+Both are built from the same four primitives every act uses — the PATH, the
+SIGNAL, the NODE and the SURFACE — so the page reads as one designed world.
+
 ## Motion architecture
 
 The page is a scroll-synchronised sequence, not a stack of sections. One

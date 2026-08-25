@@ -1,6 +1,8 @@
 import { Nav } from "@/components/drk/Nav";
 import { IntroCurtain } from "@/components/system/IntroCurtain";
+import { Undercurrent } from "@/components/system/Undercurrent";
 import { SystemTelemetry } from "@/components/system/SystemTelemetry";
+import { Seam } from "@/components/system/Seam";
 import { Hero } from "@/components/drk/Hero";
 import { Problem } from "@/components/drk/Problem";
 import { EngineModel } from "@/components/drk/EngineModel";
@@ -16,54 +18,75 @@ import { BusinessEngine } from "@/components/drk/BusinessEngine";
 import { FinalCTA } from "@/components/drk/FinalCTA";
 
 /**
- * DRK — the narrative runs:
- *   Opacity → Visibility → Infrastructure → Execution → Evidence → Scale → Compounding
+ * DRK — one descent, not fourteen sections.
+ *
+ * `Undercurrent` is the persistent world: the same system runs beneath every
+ * act for the whole document, revealing itself as you go down and retreating
+ * at the end. `Seam` carries the signal across each join, so no act ever
+ * simply stops and the next one starts.
+ *
+ * The camera moves:
+ *   MACRO → RESTRICTED → EXPANSION → DETAIL → QUIET → IMMERSION →
+ *   COMPLEXITY → SATISFACTION → CONTINUITY → PRODUCT → DEPTH →
+ *   SYSTEMIC → ACCELERATION → VOID
  */
 export default function Page() {
   return (
     <>
       <IntroCurtain />
+      <Undercurrent />
       <SystemTelemetry />
       <Nav />
 
-      <main id="main">
-        {/* ACT 01 — Activation */}
+      <main id="main" className="relative z-10">
+        {/* MACRO — the system is already running */}
         <Hero />
+        <Seam from={0.5} to={0.34} label="Assets in" />
 
-        {/* ACT 02 — The problem: opacity becomes observability */}
+        {/* RESTRICTED — the black box */}
         <Problem />
+        <Seam from={0.34} to={0.5} label="Observable" />
 
-        {/* ACT 03 — One engine, two operating modes */}
+        {/* EXPANSION — one engine, two operators */}
         <EngineModel />
+        <Seam from={0.5} to={0.62} />
 
-        {/* ACT 04 — Product proof */}
+        {/* DETAIL — attribution */}
         <ProductProof />
+        <Seam from={0.62} to={0.28} label="Evidence" />
 
-        {/* ACT 05 — Evidence */}
+        {/* QUIET — the camera pulls back */}
         <Evidence />
+        <Seam from={0.28} to={0.5} />
 
-        {/* ACT 06 — The stack */}
+        {/* IMMERSION — the stack assembles */}
         <Architecture />
+        <Seam from={0.5} to={0.7} />
 
-        {/* ACT 07 — Expanding market */}
+        {/* COMPLEXITY — the surface expands */}
         <Market />
+        <Seam from={0.7} to={0.4} />
 
-        {/* ACT 08 — Integration speed */}
+        {/* SATISFACTION — activation */}
         <Integration />
+        <Seam from={0.4} to={0.5} label="Active" />
 
-        {/* ACT 09 — Launch lifecycle */}
+        {/* CONTINUITY — DRK stays connected */}
         <Lifecycle />
+        <Seam from={0.5} to={0.5} />
 
-        {/* ACT 10 — The control layer */}
+        {/* PRODUCT — the topology becomes the interface */}
         <ControlLayer />
+        <Seam from={0.5} to={0.5} label="Deeper" />
 
-        {/* ACT 11 — The live application */}
+        {/* DEPTH — inside the runtime */}
         <Application />
+        <Seam from={0.5} to={0.5} />
 
-        {/* ACTS 12 + 13 — Business engine & compounding */}
+        {/* SYSTEMIC + ACCELERATION — the engine returns, the loop widens */}
         <BusinessEngine />
 
-        {/* ACT 14 — Final statement + footer */}
+        {/* VOID — everything goes beneath the surface */}
         <FinalCTA />
       </main>
     </>

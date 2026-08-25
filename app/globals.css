@@ -54,6 +54,17 @@
   --radius-panel: 20px;
 }
 
+/**
+ * Registered so it can be TRANSITIONED. A bare custom property is a token
+ * string and jumps between values; registering it with a percentage syntax
+ * makes the mask on the hero's `visible` slide instead of snapping.
+ */
+@property --v-cut {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
 @layer base {
   :root {
     /* Composite material tokens — referenced by the .glass / .metal utilities */
@@ -92,7 +103,9 @@
   }
 
   body {
-    background-color: var(--color-obsidian);
+    /* Transparent so the fixed Undercurrent world shows through. `html`
+       still carries the ground colour, so there is never a white flash. */
+    background-color: transparent;
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";
@@ -411,6 +424,24 @@
   }
   to {
     transform: scaleX(1);
+  }
+}
+
+/* The mark arrives out of the dark rather than simply being there. */
+.drk-curtain-mark {
+  animation: drk-mark-in 1.15s var(--ease-drk) both;
+}
+
+@keyframes drk-mark-in {
+  from {
+    opacity: 0;
+    transform: scale(1.035);
+    filter: blur(9px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
   }
 }
 

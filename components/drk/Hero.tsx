@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LiquidityField } from "./LiquidityField";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Primitives";
 import { usePointerVars, useIsCompact, useStage } from "@/lib/scroll";
@@ -61,7 +60,7 @@ export function Hero() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(120% 90% at 78% 42%, rgba(21,23,22,0.9) 0%, rgba(8,13,12,1) 62%)",
+              "radial-gradient(120% 90% at 78% 42%, rgba(21,23,22,0.35) 0%, rgba(8,13,12,0.82) 62%)",
           }}
         />
 
@@ -75,28 +74,20 @@ export function Hero() {
           }}
         />
 
-        {/* The field descends beneath the page as the hero exits. */}
+        {/* The hero's lens on the global Undercurrent: brightens the right of
+            the frame where the routes converge, and sinks as the act exits.
+            One world, seen through this act's window. */}
         <div
           className="absolute inset-0"
           style={{
             ...enter(1, 0, 2.2),
-            maskImage: fieldMask,
-            WebkitMaskImage: fieldMask,
-            maskComposite: "intersect",
-            WebkitMaskComposite: "source-in",
+            background: compact
+              ? "radial-gradient(100% 52% at 84% 80%, rgba(0,255,122,0.05), transparent 72%)"
+              : "radial-gradient(62% 62% at 72% 56%, rgba(0,255,122,0.06), transparent 74%)",
+            transform: "translate3d(0, calc(var(--p) * 12vh), 0)",
+            opacity: "calc(1 - var(--p) * 0.85)",
           }}
-        >
-          <div
-            className="h-full w-full"
-            style={{
-              transform:
-                "translate3d(calc(var(--mx,0) * 10px), calc(var(--p) * 14vh + var(--my,0) * 8px), 0) scale(calc(1 + var(--p) * 0.08))",
-              opacity: `calc(1 - var(--p) * 0.75)`,
-            }}
-          >
-            <LiquidityField intensity={compact ? 0.3 : 0.45} />
-          </div>
-        </div>
+        />
 
         <div
           className="absolute inset-x-0 bottom-0 h-1/2"
@@ -147,14 +138,36 @@ export function Hero() {
                 {i === hero.emphasisIndex ? (
                   <>
                     <span>into </span>
-                    <span
-                      className="text-tint"
-                      style={{
-                        textShadow: `0 0 46px rgba(0,255,122,${t >= 4 ? 0.3 : 0})`,
-                        transition: "text-shadow 1.6s var(--ease-drk) 0.3s",
-                      }}
-                    >
-                      visible
+                    {/* THE WORD ITSELF IS THE ARGUMENT.
+                        `visible` is not coloured in — it surfaces. A mask
+                        sits over it and lifts left-to-right, so the word is
+                        revealed from beneath a dark layer rather than simply
+                        styled green. The glow arrives after it has cleared. */}
+                    <span className="relative inline-block align-baseline">
+                      <span
+                        className="text-tint"
+                        style={{
+                          // Modest glow: the line clips to `overflow-hidden`,
+                          // and a wide shadow would clip into a visible box.
+                          textShadow: `0 0 18px rgba(0,255,122,${t >= 5 ? 0.35 : 0})`,
+                          transition: "text-shadow 1.4s var(--ease-drk) 0.5s",
+                        }}
+                      >
+                        visible
+                      </span>
+                      {/* The dark layer it comes out from. Same colour as the
+                          ground, so it does not read as a wipe crossing the
+                          word — the word surfaces through it. */}
+                      <span
+                        aria-hidden
+                        className="absolute inset-y-[-0.1em] left-[-0.06em] right-[-0.06em] origin-right"
+                        style={{
+                          background:
+                            "linear-gradient(90deg, rgba(8,13,12,0.4) 0%, var(--color-obsidian) 22%)",
+                          transform: t >= 4 ? "scaleX(0)" : "scaleX(1)",
+                          transition: "transform 1.45s var(--ease-drk) 0.28s",
+                        }}
+                      />
                     </span>
                   </>
                 ) : (
