@@ -260,6 +260,86 @@
 }
 
 /* ============================================================================
+   SCROLL STAGE SYSTEM
+   The engine writes `--p` (0→1) onto a stage root. `--p` inherits, so every
+   descendant can interpolate in pure CSS — no React renders during scroll.
+   ========================================================================= */
+
+/* Pin length: shorter travel on compact viewports. */
+[data-stage="pin"] {
+  --stage-len: var(--len-d, 2);
+}
+
+@media (max-width: 900px) {
+  [data-stage="pin"] {
+    --stage-len: var(--len-m, 1.2);
+  }
+}
+
+@layer components {
+  /**
+   * `.band` — a child that activates during one slice of the parent stage.
+   * Set --from / --to (0..1) and read --lp (0..1) for that slice's progress.
+   * --le is an eased copy for anything that should not move linearly.
+   */
+  .band {
+    --from: 0;
+    --to: 1;
+    --lp: clamp(0, calc((var(--p) - var(--from)) / (var(--to) - var(--from))), 1);
+    --le: calc(var(--lp) * var(--lp) * (3 - 2 * var(--lp)));
+  }
+
+  /** Fades + lifts across its band. The workhorse for scrubbed content. */
+  .band-rise {
+    opacity: var(--lp);
+    transform: translate3d(0, calc((1 - var(--le)) * var(--rise, 26px)), 0);
+  }
+
+  /** Holds fully visible through the middle, fades at both ends of its band. */
+  .band-hold {
+    --in: clamp(0, calc((var(--p) - var(--from)) / var(--fade, 0.08)), 1);
+    --out: clamp(0, calc((var(--to) - var(--p)) / var(--fade, 0.08)), 1);
+    opacity: min(var(--in), var(--out));
+    transform: translate3d(
+      0,
+      calc((1 - min(var(--in), var(--out))) * var(--rise, 18px)),
+      0
+    );
+    pointer-events: none;
+  }
+
+  /** Nth-child stagger inside a stage: set --i on the child, --n on the list. */
+  .band-step {
+    --lp: clamp(0, calc(var(--p) * var(--n, 1) - var(--i, 0)), 1);
+    --le: calc(var(--lp) * var(--lp) * (3 - 2 * var(--lp)));
+  }
+
+  /** SVG path that draws itself across its band. */
+  .band-draw {
+    stroke-dasharray: var(--len, 1000);
+    stroke-dashoffset: calc(var(--len, 1000) * (1 - var(--le, var(--lp))));
+  }
+}
+
+/* Progress-linked colour without a repaint storm: color-mix on a var. */
+@layer utilities {
+  .lit-text {
+    color: color-mix(
+      in srgb,
+      var(--color-hero) calc(var(--lp, 0) * 100%),
+      var(--color-ink-ghost)
+    );
+  }
+  .lit-ink {
+    color: color-mix(
+      in srgb,
+      var(--color-ink) calc(var(--lp, 0) * 100%),
+      var(--color-ink-ghost)
+    );
+  }
+}
+
+/* ============================================================================
    KEYFRAMES  — transform / opacity only, no layout-affecting properties
    ========================================================================= */
 @keyframes drk-sweep {
@@ -313,6 +393,26 @@
   100% {
     transform: translateY(100%);
     opacity: 0;
+  }
+}
+
+/* A packet circulating a closed ring. */
+@keyframes drk-orbit {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -239;
+  }
+}
+
+/* A packet travelling along a signal path. */
+@keyframes drk-packet {
+  from {
+    stroke-dashoffset: var(--len, 600);
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 

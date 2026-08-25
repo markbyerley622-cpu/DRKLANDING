@@ -6,9 +6,7 @@ Programmatic trading & liquidity infrastructure for market operations.
 
 - **Next.js 16** (App Router, Turbopack) · **React 19** · **TypeScript**
 - **Tailwind CSS 4** with a DRK token layer in `app/globals.css`
-- **No animation dependencies.** All motion is hand-rolled: CSS transitions,
-  a shared `IntersectionObserver`, rAF-throttled scroll progress, and one
-  Canvas 2D field. This keeps the bundle small and the motion tunable.
+- **No animation dependencies** — not even GSAP. See "Motion architecture".
 
 ## Run
 
@@ -26,12 +24,41 @@ Zero configuration. Import the repo and deploy — the app is fully static
 variables, or external services. Fonts are self-hosted at build time via
 `next/font`, so there are no runtime third-party requests.
 
+## Motion architecture
+
+The page is a scroll-synchronised sequence, not a stack of sections. One
+engine (`lib/scroll.ts`) owns **a single scroll listener and a single rAF
+loop**, does one read pass over every stage, then one write pass.
+
+**Progress is published as a CSS variable, not React state.** Each stage
+writes `--p` (0 → 1) onto its own DOM node; `--p` inherits, so descendants
+interpolate in pure CSS. React re-renders only when a *discrete* step index
+changes. Measured cost: **median 16.6 ms / p95 17.7 ms** per scroll frame —
+inside the 60fps budget.
+
+**Pinning is `position: sticky`, not a library.** A `PinnedStage` is a tall
+spacer wrapping a sticky viewport-height frame, so the browser owns the pin.
+No injected pin-spacing, no transform-based faux-pinning fighting native
+scroll, no scroll-jacking possible, and cleanup is just React unmounting.
+Resize is handled by the browser for free.
+
+Helper classes in `globals.css` (`.band`, `.band-rise`, `.band-hold`,
+`.band-step`, `.band-draw`) map a slice of `--p` onto a child's local
+progress, so a stage's choreography is declared where the markup lives.
+
+Pin length is set per-stage and **shortened on compact viewports** via
+`--len-d` / `--len-m`, giving mobile a deliberately tighter sequence with no
+JS branch.
+
+`SystemTelemetry` reads any element declaring `data-phase`, so the persistent
+`SYSTEM / …` readout can never drift out of sync with the page structure.
+
 ## Structure
 
 ```
 app/
   layout.tsx        fonts, metadata, skip link
-  page.tsx          the 15-act narrative composition
+  page.tsx          the 14-act narrative composition
   globals.css       DRK design tokens + material utilities
 content/
   drk.ts            SINGLE SOURCE OF TRUTH for all copy and data

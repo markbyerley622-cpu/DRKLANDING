@@ -36,6 +36,7 @@ export const nav = [
   { label: "Liquidity", href: "#architecture" },
   { label: "Execution", href: "#proof" },
   { label: "Reporting", href: "#evidence" },
+  { label: "Contact", href: "#contact" },
 ] as const;
 
 /* -------------------------------------------------------------------------- */
@@ -490,41 +491,15 @@ export const compounding = {
 } as const;
 
 /* -------------------------------------------------------------------------- */
-/* ACT 14 — THE RAISE                                                         */
+/* ACT 14 — FINAL STATEMENT                                                   */
 /* -------------------------------------------------------------------------- */
-
-export const raise = {
-  eyebrow: "13 — The raise",
-  headline: "$1.5M seed round.",
-  body: "80% productive. 20% platform.",
-  /** These four figures WERE supplied in the brief and are used verbatim. */
-  allocation: [
-    {
-      id: "productive",
-      amount: "$1.2M",
-      share: 80,
-      title: "Operating balance-sheet liquidity",
-      detail: "Deployed directly into productive market capacity.",
-      tone: "hero" as const,
-    },
-    {
-      id: "platform",
-      amount: "$300K",
-      share: 20,
-      title: "Growth and operating capital",
-      detail: "Engineering, operations and platform scale.",
-      tone: "muted" as const,
-    },
-  ],
-  statement:
-    "Capital is deployed into productive market capacity while the platform scales.",
-  disclaimer:
-    "Forward-looking statements regarding deployment, capacity and returns are projections, not guarantees. Capital deployed into market operations is at risk. Nothing on this page is an offer to sell or a solicitation to buy securities, and it does not constitute investment advice.",
-} as const;
-
-/* -------------------------------------------------------------------------- */
-/* ACT 15 — FINAL STATEMENT                                                   */
-/* -------------------------------------------------------------------------- */
+/*
+ * NOTE: the seed-round act ($1.5M / 80–20 / $1.2M / $300K) was removed at the
+ * founder's request. The page no longer carries any capital-raise content, so
+ * the securities/forward-looking disclaimer that accompanied it was removed
+ * with it — there is no longer an offer or projection on the page to qualify.
+ * Recover the component from git history if the act is ever reinstated.
+ */
 
 export const closing = {
   /**

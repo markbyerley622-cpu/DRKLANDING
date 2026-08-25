@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { useReveal, stagger } from "@/lib/motion";
+import { useReveal } from "@/lib/scroll";
 
 /* -------------------------------------------------------------------------- */
 /* Reveal wrapper                                                             */
@@ -54,15 +54,19 @@ export function Section({
   children,
   className = "",
   bleed = false,
+  phase,
 }: {
   id?: string;
   children: ReactNode;
   className?: string;
   bleed?: boolean;
+  /** System-telemetry state this act represents while on screen. */
+  phase?: string;
 }) {
   return (
     <section
       id={id}
+      data-phase={phase}
       className={`relative w-full ${bleed ? "" : "px-6 sm:px-8 lg:px-12"} ${className}`}
     >
       <div className={bleed ? "" : "mx-auto w-full max-w-[1280px]"}>{children}</div>

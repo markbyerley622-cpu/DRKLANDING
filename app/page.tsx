@@ -1,5 +1,5 @@
 import { Nav } from "@/components/drk/Nav";
-import { ScrollProgress } from "@/components/drk/ScrollProgress";
+import { SystemTelemetry } from "@/components/system/SystemTelemetry";
 import { Hero } from "@/components/drk/Hero";
 import { Problem } from "@/components/drk/Problem";
 import { EngineModel } from "@/components/drk/EngineModel";
@@ -12,7 +12,6 @@ import { Lifecycle } from "@/components/drk/Lifecycle";
 import { ControlLayer } from "@/components/drk/ControlLayer";
 import { Application } from "@/components/drk/Application";
 import { BusinessEngine } from "@/components/drk/BusinessEngine";
-import { CapitalAllocation } from "@/components/drk/CapitalAllocation";
 import { FinalCTA } from "@/components/drk/FinalCTA";
 
 /**
@@ -22,7 +21,7 @@ import { FinalCTA } from "@/components/drk/FinalCTA";
 export default function Page() {
   return (
     <>
-      <ScrollProgress />
+      <SystemTelemetry />
       <Nav />
 
       <main id="main">
@@ -62,10 +61,7 @@ export default function Page() {
         {/* ACTS 12 + 13 — Business engine & compounding */}
         <BusinessEngine />
 
-        {/* ACT 14 — The raise */}
-        <CapitalAllocation />
-
-        {/* ACT 15 — Final statement + footer */}
+        {/* ACT 14 — Final statement + footer */}
         <FinalCTA />
       </main>
     </>

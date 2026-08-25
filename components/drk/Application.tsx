@@ -1,34 +1,38 @@
 "use client";
 
-import { Section, Reveal, Eyebrow, Chip } from "@/components/ui/Primitives";
-import { Sparkline, TickingLabel } from "./Sparkline";
-import { useScrollProgress, range, smooth } from "@/lib/motion";
+import { Section, Eyebrow, Reveal, Chip } from "@/components/ui/Primitives";
+import { PinnedStage } from "@/components/system/Stage";
+import { Readout } from "@/components/system/Objects";
 import { application } from "@/content/drk";
 
 /**
- * ACT 11 — THE LIVE APPLICATION
- * Full-bleed. The environment rises out of the page as you scroll into it —
- * no device mockup, no frame. The page itself becomes the application.
+ * ACT 11 — DEEPER INSPECTION
+ *
+ * Not a flythrough. The user descends through six fixed depths of the same
+ * runtime — TOKEN → RUNTIME → POOLS → PROGRAMS → OPERATE → P/L — with each
+ * layer scaling up and dissolving as the next resolves beneath it. Precise,
+ * like stepping down through cross-sections, never flying around the screen.
+ *
+ * The final depth reveals CLIENT VIEW — UNFILTERED: the payoff of the whole
+ * observability narrative.
  */
+
+const DEPTHS = [
+  { id: "token", label: "Token", rows: [["Supply", "Known"], ["Holders", "Enumerated"], ["Venues", "Mapped"]] },
+  { id: "runtime", label: "Runtime", rows: [["Wallets", "Online"], ["Liquidity", "Online"], ["Execution", "Online"]] },
+  { id: "pools", label: "Pools", rows: [["Depth", "Programmatic"], ["Venues", "Connected"], ["Migration", "Continuous"]] },
+  { id: "programs", label: "Programs", rows: [["Definition", "Explicit"], ["Operator", "Assigned"], ["Outputs", "Measured"]] },
+  { id: "operate", label: "Operate", rows: [["Controls", "Enforced"], ["Limits", "Live"], ["Response", "Automatic"]] },
+  { id: "pnl", label: "P/L", rows: [["Basis", "Program-level"], ["Reconciliation", "Continuous"], ["Client view", "Unfiltered"]] },
+] as const;
+
+const N = DEPTHS.length;
+const band = (i: number) => 0.05 + (i * 0.82) / N;
+
 export function Application() {
-  const { ref, progress } = useScrollProgress<HTMLDivElement>({ start: 0.95, end: 0.35 });
-  const rise = smooth(range(progress, 0, 0.55));
-
   return (
-    <Section id="application" bleed className="relative py-28 sm:py-36 lg:py-44">
-      {/* Environment bloom */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(70% 50% at 50% 62%, rgba(0,255,122,0.07), transparent 70%)",
-          opacity: rise,
-          transition: "opacity 900ms var(--ease-drk)",
-        }}
-      />
-
-      <div className="mx-auto w-full max-w-[1280px] px-6 sm:px-8 lg:px-12">
+    <>
+      <Section id="application" className="pt-28 sm:pt-36 lg:pt-44">
         <div className="flex flex-col items-center text-center">
           <Reveal>
             <Eyebrow>{application.eyebrow}</Eyebrow>
@@ -44,168 +48,148 @@ export function Application() {
             </p>
           </Reveal>
         </div>
-      </div>
+      </Section>
 
-      {/* ---- The environment ------------------------------------------------ */}
-      <div ref={ref} className="relative mt-16 lg:mt-20">
-        <div
-          className="mx-auto w-full max-w-[1440px] px-3 sm:px-6"
-          style={{
-            transform: `translateY(${(1 - rise) * 60}px) scale(${0.965 + rise * 0.035})`,
-            opacity: 0.25 + rise * 0.75,
-            transition: "transform 180ms linear, opacity 400ms linear",
-          }}
-        >
+      <PinnedStage length={3.2} compactLength={2.4} phase="Unfiltered" className="mt-14 sm:mt-16">
+        <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-4 sm:px-8">
+          {/* depth bloom */}
           <div
-            className="relative overflow-hidden rounded-t-[22px] border-x border-t"
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
             style={{
-              borderColor: "rgba(255,255,255,0.09)",
               background:
-                "linear-gradient(180deg, rgba(24,29,28,0.7) 0%, rgba(13,17,16,0.9) 40%, rgba(8,13,12,1) 100%)",
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.14), 0 -40px 100px -50px rgba(0,255,122,0.35)",
+                "radial-gradient(48% 44% at 50% 50%, rgba(0,255,122,0.10), transparent 70%)",
+              opacity: "calc(0.3 + var(--p) * 0.7)",
+              filter: "blur(22px)",
             }}
-          >
-            {/* Top rail */}
-            <div className="scroll-x flex items-center gap-4 border-b border-white/[0.06] px-4 py-3.5 sm:px-7">
-              <span className="shrink-0 font-display text-[15px] font-bold tracking-[-0.03em] text-ink">
-                DRK
-              </span>
-              <span aria-hidden className="h-3.5 w-px shrink-0 bg-white/10" />
-              <nav
-                aria-label="Application areas"
-                className="flex shrink-0 items-center gap-1"
-              >
-                {application.rail.map((r, i) => (
-                  <span
-                    key={r}
-                    className="rounded-full px-3 py-[6px] font-mono text-[10px] uppercase tracking-[0.14em] transition-all duration-700"
-                    style={{
-                      color: i === 0 ? "var(--color-ink)" : "var(--color-ink-faint)",
-                      background:
-                        i === 0 ? "linear-gradient(180deg, rgba(34,37,35,0.9), rgba(13,17,16,0.95))" : "transparent",
-                      border: `1px solid ${i === 0 ? "rgba(0,255,122,0.26)" : "transparent"}`,
-                    }}
-                  >
-                    {r}
-                  </span>
-                ))}
-              </nav>
-              <span className="ml-auto shrink-0">
-                <Chip tone="live">Operating</Chip>
-              </span>
+          />
+
+          <div className="relative w-full max-w-[880px]">
+            {/* ---- Depth rail ------------------------------------------- */}
+            <div className="mb-6 flex items-center justify-center gap-1.5 sm:gap-2.5">
+              {DEPTHS.map((d, i) => (
+                <span
+                  key={d.id}
+                  className="font-mono text-[9px] uppercase tracking-[0.16em] sm:text-[10px]"
+                  style={{
+                    ["--on" as string]: `calc(clamp(0, calc((var(--p) - ${band(i).toFixed(3)}) / 0.02), 1) * clamp(0, calc((${(band(i + 1) + 0.02).toFixed(3)} - var(--p)) / 0.02), 1))`,
+                    color:
+                      "color-mix(in srgb, var(--color-hero) calc(var(--on) * 100%), var(--color-ink-ghost))",
+                  }}
+                >
+                  {d.label}
+                  {i < N - 1 && <span className="mx-1 text-ink-ghost sm:mx-1.5">/</span>}
+                </span>
+              ))}
             </div>
 
-            {/* Workspace */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_0.85fr]">
-              {/* Column 1 — runtime state */}
-              <div className="border-b border-white/[0.06] p-5 sm:p-7 md:border-b-0 md:border-r">
-                <ColHead label="Runtime" />
-                <div className="mt-5 space-y-2.5">
-                  {["Wallets", "Liquidity", "Execution", "Reporting"].map((k, i) => (
-                    <div
-                      key={k}
-                      className="flex items-center justify-between rounded-[10px] border border-white/[0.055] px-3.5 py-3"
-                      style={{ background: "rgba(21,23,22,0.5)" }}
-                    >
-                      <span className="font-mono text-[11px] tracking-[0.06em] text-ink-muted">{k}</span>
-                      <span className="flex items-center gap-2">
-                        <span
-                          aria-hidden
-                          className="h-[4px] w-[4px] rounded-full bg-hero"
-                          style={{
-                            boxShadow: "0 0 7px rgba(0,255,122,0.8)",
-                            animation: `drk-pulse ${2.4 + i * 0.35}s ease-in-out infinite`,
-                          }}
-                        />
-                        <span className="font-mono text-[10.5px] uppercase tracking-[0.13em] text-hero">
-                          Online
+            {/* ---- Stacked cross-sections ------------------------------- */}
+            <div className="relative h-[46svh] min-h-[300px]">
+              {DEPTHS.map((d, i) => (
+                <div
+                  key={d.id}
+                  className="band absolute inset-0"
+                  style={{
+                    ["--from" as string]: band(i),
+                    ["--to" as string]: band(i + 1),
+                    ["--in" as string]: `clamp(0, calc((var(--p) - ${band(i).toFixed(3)}) / 0.045), 1)`,
+                    ["--out" as string]: `clamp(0, calc((${band(i + 1).toFixed(3)} - var(--p)) / 0.045), 1)`,
+                    opacity: "min(var(--in), var(--out))",
+                    // Rises from beneath, then scales past the viewer.
+                    transform:
+                      "scale(calc(0.94 + var(--in) * 0.06 + (1 - var(--out)) * 0.1)) translate3d(0, calc((1 - var(--in)) * 26px), 0)",
+                    filter: "blur(calc((1 - min(var(--in), var(--out))) * 5px))",
+                  }}
+                >
+                  <div
+                    className="glass metal-rim h-full overflow-hidden rounded-[var(--radius-panel)]"
+                    style={{ boxShadow: "var(--highlight-inset), var(--depth-shadow)" }}
+                  >
+                    <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <span className="font-display text-[13px] font-bold tracking-[-0.03em] text-ink">
+                          DRK
                         </span>
+                        <span aria-hidden className="h-3 w-px bg-white/10" />
+                        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-hero">
+                          {d.label}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-faint">
+                        {`Depth 0${i + 1}`}
                       </span>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Column 2 — programs */}
-              <div className="border-b border-white/[0.06] p-5 sm:p-7 md:border-b-0 md:border-r">
-                <ColHead label="Programs" />
-                <div className="mt-5 space-y-2.5">
-                  {["Program A", "Program B", "Program C"].map((p, i) => (
-                    <div
-                      key={p}
-                      className="rounded-[10px] border border-white/[0.055] p-3.5"
-                      style={{
-                        background:
-                          i === 0
-                            ? "linear-gradient(160deg, rgba(34,37,35,0.7), rgba(13,17,16,0.85))"
-                            : "rgba(21,23,22,0.45)",
-                        borderColor: i === 0 ? "rgba(0,255,122,0.2)" : "rgba(255,255,255,0.055)",
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-[11px] tracking-[0.06em] text-ink">{p}</span>
-                        <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink-faint">
-                          <TickingLabel
-                            values={["Executing", "Routing", "Attributed"] as const}
-                            intervalMs={2800 + i * 500}
+                    <div className="grid h-[calc(100%-49px)] grid-cols-1 sm:grid-cols-[1fr_0.9fr]">
+                      <div className="border-b border-white/[0.06] p-5 sm:border-b-0 sm:border-r sm:p-7">
+                        {d.rows.map(([k, v], r) => (
+                          <Readout
+                            key={k}
+                            k={k}
+                            v={v}
+                            accent={r === d.rows.length - 1 && i === N - 1}
                           />
-                        </span>
+                        ))}
+                        <p className="mt-5 font-mono text-[9px] uppercase leading-[1.7] tracking-[0.14em] text-ink-faint">
+                          Cross-section {`0${i + 1}`} of {`0${N}`} · structure only
+                        </p>
                       </div>
-                      <Sparkline seed={53 + i * 9} height={34} drift={0.24} fill={false} />
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Column 3 — P/L */}
-              <div className="p-5 sm:p-7">
-                <ColHead label="P/L" />
-                <div className="mt-5 rounded-[12px] border border-white/[0.06] bg-obsidian/55 p-4">
-                  <Sparkline seed={97} height={120} drift={0.34} />
-                  <div className="mt-4 space-y-2.5 border-t border-white/[0.06] pt-4">
-                    {[
-                      ["Basis", "Program-level"],
-                      ["Reconciliation", "Continuous"],
-                      ["Client view", "Unfiltered"],
-                    ].map(([k, v]) => (
-                      <div key={k} className="flex items-baseline justify-between gap-3">
-                        <span className="font-mono text-[9.5px] uppercase tracking-[0.15em] text-ink-ghost">
-                          {k}
-                        </span>
-                        <span className="font-mono text-[11px] text-ink">{v}</span>
+                      {/* The layer's cross-section: this depth lit, the ones
+                          above and below it visible but receding. */}
+                      <div className="flex items-center justify-center p-5 sm:p-7">
+                        <div className="flex w-full max-w-[220px] flex-col gap-[7px]">
+                          {DEPTHS.map((_, s) => {
+                            const dist = Math.abs(s - i);
+                            const isThis = s === i;
+                            return (
+                              <span
+                                key={s}
+                                className="block rounded-[5px]"
+                                style={{
+                                  height: isThis ? 22 : 11,
+                                  background: isThis
+                                    ? "linear-gradient(100deg, rgba(0,255,122,0.34), rgba(0,255,122,0.09))"
+                                    : "rgba(255,255,255,0.045)",
+                                  border: `1px solid ${isThis ? "rgba(0,255,122,0.5)" : "rgba(255,255,255,0.07)"}`,
+                                  boxShadow: isThis
+                                    ? "0 0 22px -6px rgba(0,255,122,0.9), inset 0 1px 0 rgba(255,255,255,0.16)"
+                                    : "inset 0 1px 0 rgba(255,255,255,0.05)",
+                                  opacity: isThis ? 1 : Math.max(0.2, 0.62 - dist * 0.14),
+                                  transform: `scaleX(${isThis ? 1 : Math.max(0.62, 1 - dist * 0.1)})`,
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                  <p className="mt-4 font-mono text-[9px] leading-[1.6] tracking-[0.05em] text-ink-faint">
-                    Interface preview — figures withheld pending disclosure approval.
-                  </p>
                 </div>
-              </div>
+              ))}
             </div>
 
-            {/* The environment dissolves back into the page */}
+            {/* ---- The payoff ------------------------------------------- */}
             <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-28"
+              className="band mt-7 flex flex-col items-center gap-3"
               style={{
-                background: "linear-gradient(180deg, transparent, var(--color-obsidian) 92%)",
+                ["--from" as string]: 0.9,
+                ["--to" as string]: 0.99,
+                opacity: "var(--lp)",
+                transform: "translate3d(0, calc((1 - var(--le)) * 12px), 0)",
               }}
-            />
+            >
+              <Chip tone="live">Client view</Chip>
+              <p
+                className="display text-center text-[clamp(1.4rem,3.4vw,2.4rem)] text-ink"
+                style={{ textShadow: "0 0 40px rgba(0,255,122,0.22)" }}
+              >
+                Unfiltered.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    </Section>
-  );
-}
-
-function ColHead({ label }: { label: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-ink-ghost">
-        {label}
-      </span>
-      <span aria-hidden className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-    </div>
+      </PinnedStage>
+    </>
   );
 }

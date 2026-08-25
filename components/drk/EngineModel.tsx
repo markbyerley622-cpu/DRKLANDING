@@ -1,181 +1,187 @@
 "use client";
 
-import { useState } from "react";
-import { Reveal, Section, SectionHead, Panel } from "@/components/ui/Primitives";
+import { Section, SectionHead } from "@/components/ui/Primitives";
+import { PinnedStage } from "@/components/system/Stage";
+import { Orb, Node } from "@/components/system/Objects";
 import { engine } from "@/content/drk";
 
 /**
- * ACT 03 — ONE ENGINE
- * Not two cards. A single core with two operating modes branching off it;
- * hovering/focusing a mode routes the core's energy toward that branch.
+ * ACT 03 — ONE ENGINE, TWO OPERATING MODES
+ *
+ *   0.00 → 0.28   A single engine. Nothing has split yet.
+ *   0.28 → 0.55   Two operating paths separate outward from the same core.
+ *                 The core never duplicates — only the operator changes.
+ *   0.55 → 0.78   The paths reconnect beneath into ONE RUNTIME.
+ *   0.78 → 1.00   The two revenue outcomes emerge.
+ *
+ * Spatial choreography, not card hovers.
  */
 export function EngineModel() {
-  const [hovered, setHovered] = useState<number | null>(null);
-
   return (
-    <Section id="engine" className="py-28 sm:py-36 lg:py-44">
-      <SectionHead
-        eyebrow={engine.eyebrow}
-        headline={
-          <>
-            One proprietary engine.
-            <br />
-            <span className="text-ink-muted">Two scalable businesses.</span>
-          </>
-        }
-        body={engine.body}
-      />
+    <>
+      <Section id="engine" className="pt-28 sm:pt-36 lg:pt-44">
+        <SectionHead
+          eyebrow={engine.eyebrow}
+          headline={
+            <>
+              One proprietary engine.
+              <br />
+              <span className="text-ink-muted">Two scalable businesses.</span>
+            </>
+          }
+          body={engine.body}
+        />
+      </Section>
 
-      <div className="mt-16 lg:mt-24">
-        {/* ---- The core ---------------------------------------------------- */}
-        <Reveal>
-          <div className="relative mx-auto flex max-w-[420px] flex-col items-center justify-center">
-            <Core active={hovered !== null} />
-            <span className="mt-5 font-mono text-[9.5px] uppercase tracking-[0.28em] text-ink-faint">
+      <PinnedStage length={2} compactLength={1.4} phase="Engine running" className="mt-16 sm:mt-20">
+        <div className="relative flex h-full w-full items-center justify-center px-5 sm:px-8">
+          <div className="relative w-full max-w-[1000px]">
+            {/* ---- The core — one object, always ------------------------- */}
+            <div
+              className="relative z-20 mx-auto flex justify-center"
+              style={{
+                // Rises slightly as the modes split away beneath it.
+                transform:
+                  "translate3d(0, calc(clamp(0, calc((var(--p) - 0.26) / 0.3), 1) * -6vh), 0)",
+              }}
+            >
+              <Orb
+                size={168}
+                className="sm:!h-[196px] sm:!w-[196px]"
+                style={{
+                  ["--orb-a" as string]: "clamp(0.35, calc(var(--p) / 0.25), 1)",
+                }}
+              />
+            </div>
+            <p className="relative z-20 mt-6 text-center font-mono text-[9.5px] uppercase tracking-[0.28em] text-ink-faint">
               Engine
-            </span>
+            </p>
+
+            {/* ---- Split bracket: one engine → two operators -------------
+                Right angles only. `preserveAspectRatio="none"` stretches the
+                box, and straight segments survive that distortion perfectly
+                where curves would not. */}
+            <svg
+              aria-hidden
+              className="relative z-10 mt-5 hidden h-[72px] w-full sm:block"
+              viewBox="0 0 1000 72"
+              preserveAspectRatio="none"
+            >
+              <Bracket d="M500 0 V34 H180 V72" from={0.26} to={0.48} />
+              <Bracket d="M500 0 V34 H820 V72" from={0.3} to={0.52} />
+            </svg>
+
+            {/* ---- The two operating modes ------------------------------- */}
+            <div className="relative z-20 mt-6 grid grid-cols-1 gap-6 sm:mt-4 sm:grid-cols-2 sm:gap-8 lg:gap-24">
+              {engine.modes.map((mode, i) => {
+                const from = 0.3 + i * 0.05;
+                return (
+                  <div
+                    key={mode.id}
+                    className="band"
+                    style={{
+                      ["--from" as string]: from,
+                      ["--to" as string]: from + 0.16,
+                      opacity: "var(--lp)",
+                      // Each mode slides outward from the core's centre line.
+                      transform: `translate3d(calc((1 - var(--le)) * ${i === 0 ? "8%" : "-8%"}), calc((1 - var(--le)) * -18px), 0)`,
+                    }}
+                  >
+                    <div className="text-center sm:text-left">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-hero">
+                        {mode.key}
+                      </span>
+                      <h3 className="mt-3 font-display text-[19px] font-semibold leading-[1.15] tracking-[-0.025em] text-ink sm:text-[24px]">
+                        {mode.title}
+                      </h3>
+                      <p className="mx-auto mt-2.5 max-w-[34ch] text-[13.5px] leading-[1.6] text-ink-muted sm:mx-0">
+                        {mode.detail}
+                      </p>
+
+                      {/* Revenue outcome — emerges last */}
+                      <div
+                        className="band mt-5 inline-flex items-center gap-2.5"
+                        style={{
+                          ["--from" as string]: 0.8 + i * 0.04,
+                          ["--to" as string]: 0.92 + i * 0.04,
+                          opacity: "var(--lp)",
+                          transform: "translate3d(0, calc((1 - var(--le)) * 10px), 0)",
+                        }}
+                      >
+                        <span
+                          aria-hidden
+                          className="h-[5px] w-[5px] rounded-full bg-hero"
+                          style={{ boxShadow: "0 0 9px rgba(0,255,122,0.7)" }}
+                        />
+                        <span className="font-mono text-[11px] tracking-[0.06em] text-ink">
+                          {mode.revenue}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ---- Reconnect bracket: both operators → one runtime -------- */}
+            <svg
+              aria-hidden
+              className="relative z-10 mt-2 hidden h-[64px] w-full sm:block"
+              viewBox="0 0 1000 64"
+              preserveAspectRatio="none"
+            >
+              <Bracket d="M180 0 V32 H500 V64" from={0.6} to={0.78} />
+              <Bracket d="M820 0 V32 H500 V64" from={0.64} to={0.82} />
+            </svg>
+
+            {/* ---- ONE RUNTIME — the reconnection ------------------------ */}
+            <div
+              className="band relative z-20 mt-5 flex justify-center sm:mt-1"
+              style={{
+                ["--from" as string]: 0.74,
+                ["--to" as string]: 0.88,
+                opacity: "var(--lp)",
+                transform: "translate3d(0, calc((1 - var(--le)) * 14px), 0)",
+              }}
+            >
+              <Node tone="on">One runtime</Node>
+            </div>
           </div>
-        </Reveal>
-
-        {/* ---- Branch lines: desktop only, they connect core → modes -------- */}
-        <div aria-hidden className="relative mx-auto hidden h-24 max-w-[900px] lg:block">
-          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 900 96" fill="none" preserveAspectRatio="none">
-            <path
-              d="M450 0 V30 Q450 48 424 48 H240 Q214 48 214 66 V96"
-              stroke={hovered === 0 ? "rgba(0,255,122,0.75)" : "rgba(255,255,255,0.1)"}
-              strokeWidth="1"
-              className="transition-all duration-700"
-              style={{ filter: hovered === 0 ? "drop-shadow(0 0 6px rgba(0,255,122,0.7))" : "none" }}
-            />
-            <path
-              d="M450 0 V30 Q450 48 476 48 H660 Q686 48 686 66 V96"
-              stroke={hovered === 1 ? "rgba(0,255,122,0.75)" : "rgba(255,255,255,0.1)"}
-              strokeWidth="1"
-              className="transition-all duration-700"
-              style={{ filter: hovered === 1 ? "drop-shadow(0 0 6px rgba(0,255,122,0.7))" : "none" }}
-            />
-            {/* Constant faint travelling signal down the trunk */}
-            <path
-              d="M450 0 V30"
-              stroke="rgba(0,255,122,0.5)"
-              strokeWidth="1.5"
-              strokeDasharray="6 22"
-              style={{ animation: "drk-dash 9s linear infinite" }}
-            />
-          </svg>
         </div>
+      </PinnedStage>
 
-        {/* ---- The two modes ------------------------------------------------ */}
-        <div className="mt-10 grid grid-cols-1 gap-5 lg:mt-0 lg:grid-cols-2 lg:gap-6">
-          {engine.modes.map((mode, i) => (
-            <Reveal key={mode.id} delay={i * 130} y={30}>
-              <Panel
-                rim
-                sweep
-                sweepDelay={i * 1800}
-                className="group h-full p-7 transition-transform duration-700 ease-[var(--ease-drk)] hover:-translate-y-1 sm:p-9 lg:p-10"
-              >
-                {/* Hover routes the core's energy to this branch. Purely a
-                    visual enhancement — every word is already readable, so
-                    this is not a tab stop. */}
-                <div
-                  onMouseEnter={() => setHovered(i)}
-                  onMouseLeave={() => setHovered(null)}
-                  className="flex h-full flex-col"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-hero">
-                      {mode.key}
-                    </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-ghost">
-                      {mode.horizon}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-6 font-display text-[24px] font-semibold leading-[1.12] tracking-[-0.025em] text-ink sm:text-[29px]">
-                    {mode.title}
-                  </h3>
-
-                  <p className="mt-4 max-w-[42ch] flex-1 text-[14.5px] leading-[1.65] text-ink-muted">
-                    {mode.detail}
-                  </p>
-
-                  <div className="mt-9 flex items-center gap-3 border-t border-white/[0.06] pt-5">
-                    <span
-                      aria-hidden
-                      className="h-[5px] w-[5px] rounded-full bg-hero transition-shadow duration-700"
-                      style={{ boxShadow: "0 0 9px 1px rgba(0,255,122,0.6)" }}
-                    />
-                    <span className="font-mono text-[11px] tracking-[0.08em] text-ink">
-                      {mode.revenue}
-                    </span>
-                  </div>
-                </div>
-              </Panel>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </Section>
+      {/* The concept, stated once the choreography has made it */}
+      <Section className="pb-28 pt-16 sm:pb-36 lg:pb-44">
+        <p className="display mx-auto max-w-[760px] text-center text-[clamp(1.25rem,2.9vw,2rem)] text-ink">
+          The engine remains one engine.{" "}
+          <span className="text-ink-faint">Only the operator changes.</span>
+        </p>
+      </Section>
+    </>
   );
 }
 
 /* -------------------------------------------------------------------------- */
 
-function Core({ active }: { active: boolean }) {
+function Bracket({ d, from, to }: { d: string; from: number; to: number }) {
   return (
-    <div className="relative flex h-[168px] w-[168px] items-center justify-center sm:h-[196px] sm:w-[196px]">
-      {/* Outer rings */}
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          aria-hidden
-          className="absolute rounded-full border transition-all duration-1000 ease-[var(--ease-drk)]"
-          style={{
-            inset: `${i * 16}px`,
-            borderColor: `rgba(255,255,255,${0.09 - i * 0.02})`,
-            transform: active ? `scale(${1 + i * 0.015})` : "scale(1)",
-          }}
-        />
-      ))}
-
-      {/* Rotating aperture */}
-      <span
-        aria-hidden
-        className="absolute inset-[8px] rounded-full"
-        style={{
-          background:
-            "conic-gradient(from 0deg, transparent 0deg, rgba(0,255,122,0.35) 30deg, transparent 90deg, transparent 180deg, rgba(0,255,122,0.18) 220deg, transparent 300deg)",
-          animation: "drk-spin 22s linear infinite",
-          maskImage: "radial-gradient(closest-side, transparent 78%, black 80%)",
-          WebkitMaskImage: "radial-gradient(closest-side, transparent 78%, black 80%)",
-        }}
+    <g style={{ ["--from" as string]: from, ["--to" as string]: to, ["--len" as string]: 420 }}>
+      <path
+        d={d}
+        fill="none"
+        stroke="rgba(255,255,255,0.075)"
+        strokeWidth="1"
+        vectorEffect="non-scaling-stroke"
       />
-
-      {/* Glass core */}
-      <span
-        aria-hidden
-        className="absolute inset-[44px] rounded-full transition-all duration-1000 ease-[var(--ease-drk)]"
-        style={{
-          background:
-            "radial-gradient(circle at 34% 26%, rgba(255,255,255,0.16), rgba(21,23,22,0.9) 46%, rgba(8,13,12,1) 100%)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          boxShadow: active
-            ? "0 0 60px -10px rgba(0,255,122,0.55), inset 0 2px 6px rgba(255,255,255,0.14)"
-            : "0 0 40px -14px rgba(0,255,122,0.35), inset 0 2px 6px rgba(255,255,255,0.1)",
-        }}
+      <path
+        className="band band-draw"
+        d={d}
+        fill="none"
+        stroke="var(--color-hero)"
+        strokeWidth="1"
+        vectorEffect="non-scaling-stroke"
+        style={{ filter: "drop-shadow(0 0 3px rgba(0,255,122,0.85))" }}
       />
-
-      {/* Green heart */}
-      <span
-        aria-hidden
-        className="absolute h-[26px] w-[26px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(136,255,216,0.95), rgba(0,255,122,0.5) 45%, transparent 72%)",
-          filter: "blur(1px)",
-          animation: "drk-pulse 3.6s ease-in-out infinite",
-        }}
-      />
-    </div>
+    </g>
   );
 }

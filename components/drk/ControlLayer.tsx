@@ -1,139 +1,174 @@
 "use client";
 
-import { useState } from "react";
-import { Section, SectionHead, Reveal, Panel, Chip, DataRow } from "@/components/ui/Primitives";
-import { Sparkline } from "./Sparkline";
+import { Section, SectionHead, Chip } from "@/components/ui/Primitives";
+import { PinnedStage } from "@/components/system/Stage";
+import { Readout } from "@/components/system/Objects";
 import { control } from "@/content/drk";
 
 /**
- * ACT 10 — THE CONTROL LAYER
- * A genuinely interactive surface: seven modules the visitor can drive.
- * Content is operational state, never a financial claim.
+ * ACT 10 — SCROLL AS APPLICATION NAVIGATION
+ *
+ * The application shell is pinned and never rebuilt. Scroll position selects
+ * the active module; only the operating context inside the shell changes.
+ * That reuse is the point — it reads as one coherent product rather than
+ * seven unrelated screens.
  */
+
+const TABS = control.tabs;
+const N = TABS.length;
+const band = (i: number) => 0.04 + (i * 0.9) / N;
+
 export function ControlLayer() {
-  const [tab, setTab] = useState(0);
-  const active = control.tabs[tab];
-
   return (
-    <Section id="control" className="py-28 sm:py-36 lg:py-44">
-      <SectionHead
-        eyebrow={control.eyebrow}
-        headline="The DRK control layer."
-        body={control.body}
-      />
+    <>
+      <Section id="control" className="pt-28 sm:pt-36 lg:pt-44">
+        <SectionHead
+          eyebrow={control.eyebrow}
+          headline="The DRK control layer."
+          body={control.body}
+        />
+      </Section>
 
-      <Reveal y={34} className="mt-14 lg:mt-18">
-        <Panel rim className="overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr]">
-            {/* ---- Module list ------------------------------------------- */}
-            <div className="border-b border-white/[0.06] lg:border-b-0 lg:border-r">
-              <div className="flex items-center gap-2.5 px-5 py-4 sm:px-6">
-                <span
-                  aria-hidden
-                  className="h-[5px] w-[5px] rounded-full bg-hero"
-                  style={{ boxShadow: "0 0 8px rgba(0,255,122,0.7)" }}
-                />
-                <span className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-ink-faint">
-                  Modules
-                </span>
-              </div>
+      <PinnedStage length={3.6} compactLength={2.6} phase="Operating" className="mt-12 sm:mt-16">
+        <div className="relative flex h-full w-full items-center justify-center px-4 sm:px-8">
+          <div className="w-full max-w-[1160px]">
+            <div
+              className="glass metal-rim relative overflow-hidden rounded-[var(--radius-panel)]"
+              style={{ boxShadow: "var(--highlight-inset), var(--depth-shadow)" }}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-[212px_1fr]">
+                {/* ---- Module rail: follows scroll ------------------- */}
+                <div className="border-b border-white/[0.06] lg:border-b-0 lg:border-r">
+                  <div className="flex items-center gap-2.5 px-5 py-4">
+                    <span
+                      aria-hidden
+                      className="h-[5px] w-[5px] rounded-full bg-hero"
+                      style={{ boxShadow: "0 0 8px rgba(0,255,122,0.7)" }}
+                    />
+                    <span className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-ink-faint">
+                      Modules
+                    </span>
+                  </div>
 
-              {/* Horizontal scroller on mobile, vertical list on desktop */}
-              <div
-                role="tablist"
-                aria-label="Control layer modules"
-                className="scroll-x flex gap-1 px-4 pb-4 sm:px-5 lg:flex-col lg:gap-0 lg:overflow-visible lg:px-0 lg:pb-3"
-              >
-                {control.tabs.map((t, i) => {
-                  const on = i === tab;
-                  return (
-                    <button
+                  {/* Horizontal ribbon on compact, vertical list on desktop.
+                      The ribbon auto-scrolls so the active chip stays in view. */}
+                  <div className="scroll-x px-4 pb-4 lg:overflow-visible lg:px-0 lg:pb-3">
+                    <div className="flex gap-1 lg:flex-col lg:gap-0">
+                      {TABS.map((t, i) => (
+                        <span
+                          key={t.id}
+                          className="relative shrink-0 rounded-[9px] px-3.5 py-2.5 text-left font-mono text-[11px] uppercase tracking-[0.14em] lg:w-full lg:rounded-none lg:px-6 lg:py-[11px]"
+                          style={{
+                            // Lit only while this module owns the scroll band.
+                            ["--on" as string]: `calc(clamp(0, calc((var(--p) - ${band(i).toFixed(3)}) / 0.025), 1) * clamp(0, calc((${(band(i + 1) + 0.025).toFixed(3)} - var(--p)) / 0.025), 1))`,
+                            color:
+                              "color-mix(in srgb, var(--color-ink) calc(var(--on) * 100%), var(--color-ink-faint))",
+                            background:
+                              "linear-gradient(90deg, rgba(0,255,122,calc(0.075 * var(--on))), transparent)",
+                            border: "1px solid rgba(0,255,122,calc(0.22 * var(--on)))",
+                          }}
+                        >
+                          <span
+                            aria-hidden
+                            className="absolute inset-y-1 left-0 hidden w-px origin-center bg-hero lg:block"
+                            style={{
+                              transform: "scaleY(var(--on))",
+                              boxShadow: "0 0 10px rgba(0,255,122,0.8)",
+                            }}
+                          />
+                          {t.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ---- The panel: same shell, changing context -------- */}
+                <div className="relative min-h-[440px] sm:min-h-[420px]">
+                  {TABS.map((t, i) => (
+                    <div
                       key={t.id}
-                      role="tab"
-                      aria-selected={on}
-                      aria-controls={`panel-${t.id}`}
-                      id={`tab-${t.id}`}
-                      type="button"
-                      onClick={() => setTab(i)}
-                      className="group relative shrink-0 rounded-[9px] px-3.5 py-2.5 text-left font-mono text-[11px]
-                        uppercase tracking-[0.14em] transition-all duration-500 ease-[var(--ease-drk)]
-                        lg:w-full lg:rounded-none lg:px-6 lg:py-3"
+                      className="band band-hold absolute inset-0 flex flex-col p-6 sm:p-8 lg:p-10"
                       style={{
-                        color: on ? "var(--color-ink)" : "var(--color-ink-faint)",
-                        background: on
-                          ? "linear-gradient(90deg, rgba(0,255,122,0.07), transparent)"
-                          : "transparent",
-                        border: `1px solid ${on ? "rgba(0,255,122,0.22)" : "transparent"}`,
+                        ["--from" as string]: band(i),
+                        ["--to" as string]: band(i + 1),
+                        ["--fade" as string]: 0.03,
+                        ["--rise" as string]: "12px",
+                        ["--bp" as string]: "var(--lp)",
                       }}
                     >
-                      {/* Active spine, desktop only */}
-                      <span
-                        aria-hidden
-                        className="absolute inset-y-1 left-0 hidden w-px origin-center bg-hero transition-transform
-                          duration-500 ease-[var(--ease-drk)] lg:block"
-                        style={{
-                          transform: `scaleY(${on ? 1 : 0})`,
-                          boxShadow: "0 0 10px rgba(0,255,122,0.8)",
-                        }}
-                      />
-                      {t.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-display text-[23px] font-semibold tracking-[-0.025em] text-ink sm:text-[29px]">
+                            {t.label}
+                          </h3>
+                          <p className="mt-2 max-w-[46ch] text-[13.5px] leading-[1.6] text-ink-muted">
+                            {t.caption}
+                          </p>
+                        </div>
+                        <Chip tone="live">Live</Chip>
+                      </div>
 
-            {/* ---- Panel ------------------------------------------------- */}
-            <div
-              role="tabpanel"
-              id={`panel-${active.id}`}
-              aria-labelledby={`tab-${active.id}`}
-              className="p-6 sm:p-8 lg:p-10"
-              key={active.id}
-              style={{ animation: "drk-rise 620ms var(--ease-drk) both" }}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-display text-[24px] font-semibold tracking-[-0.025em] text-ink sm:text-[30px]">
-                    {active.label}
-                  </h3>
-                  <p className="mt-2 max-w-[46ch] text-[14px] leading-[1.6] text-ink-muted">
-                    {active.caption}
-                  </p>
-                </div>
-                <Chip tone="live">Live</Chip>
-              </div>
+                      <div
+                        className="mt-7 grid grid-cols-1 gap-x-10 lg:grid-cols-2"
+                        style={{ ["--n" as string]: 4 }}
+                      >
+                        {t.rows.map((r, ri) => (
+                          <div
+                            key={r.k}
+                            className="band-step"
+                            style={{
+                              ["--i" as string]: ri,
+                              ["--p" as string]:
+                                "clamp(0, calc((var(--bp) - 0.1) / 0.6), 1)",
+                              opacity: "calc(0.28 + var(--le) * 0.72)",
+                              transform:
+                                "translate3d(calc((1 - var(--le)) * 9px), 0, 0)",
+                            }}
+                          >
+                            <Readout k={r.k} v={r.v} accent={ri === 0} />
+                          </div>
+                        ))}
+                      </div>
 
-              <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_0.85fr] lg:gap-10">
-                {/* State rows */}
-                <div className="divide-y divide-white/[0.05]">
-                  {active.rows.map((r, i) => (
-                    <div key={r.k} style={{ animation: `drk-rise 560ms var(--ease-drk) ${i * 70}ms both` }}>
-                      <DataRow k={r.k} v={r.v} accent={i === 0} />
+                      {/* Operating context strip — pinned to the panel's
+                          bottom edge so it can never ride over the shell
+                          footer on short viewports. */}
+                      <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/[0.06] pt-5">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-faint">
+                          Context
+                        </span>
+                        <span className="font-mono text-[10.5px] tracking-[0.06em] text-hero">
+                          {t.label}
+                        </span>
+                        <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.16em] text-ink-faint">
+                          {`0${i + 1} / 0${N}`}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
+              </div>
 
-                {/* Telemetry */}
-                <div className="rounded-[12px] border border-white/[0.06] bg-obsidian/50 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-ink-ghost">
-                      {active.label} telemetry
-                    </span>
-                    <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-ghost">
-                      Shape only
-                    </span>
-                  </div>
-                  <Sparkline seed={31 + tab * 7} height={104} drift={0.28} />
-                  <p className="mt-3 font-mono text-[9px] leading-[1.6] tracking-[0.05em] text-ink-faint">
-                    Illustrative telemetry. No axis values are shown and none are implied.
-                  </p>
-                </div>
+              {/* Shell footer — constant across every module */}
+              <div className="flex items-center justify-between gap-4 border-t border-white/[0.06] px-5 py-3 sm:px-7">
+                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-faint">
+                  One shell · seven contexts
+                </span>
+                <span
+                  aria-hidden
+                  className="h-px flex-1"
+                  style={{ background: "rgba(255,255,255,0.05)" }}
+                />
+                <span
+                  className="h-[4px] w-[4px] rounded-full bg-hero"
+                  style={{ boxShadow: "0 0 8px rgba(0,255,122,0.8)" }}
+                />
               </div>
             </div>
           </div>
-        </Panel>
-      </Reveal>
-    </Section>
+        </div>
+      </PinnedStage>
+    </>
   );
 }
