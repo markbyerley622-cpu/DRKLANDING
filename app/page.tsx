@@ -6,29 +6,29 @@ import { Seam } from "@/components/system/Seam";
 import { Hero } from "@/components/drk/Hero";
 import { Problem } from "@/components/drk/Problem";
 import { EngineModel } from "@/components/drk/EngineModel";
-import { ProductProof } from "@/components/drk/ProductProof";
-import { Evidence } from "@/components/drk/Evidence";
-import { Architecture } from "@/components/drk/Architecture";
-import { Market } from "@/components/drk/Market";
-import { Integration } from "@/components/drk/Integration";
+import { System } from "@/components/drk/System";
+import { Infrastructure } from "@/components/drk/Infrastructure";
 import { Lifecycle } from "@/components/drk/Lifecycle";
-import { ControlLayer } from "@/components/drk/ControlLayer";
-import { Application } from "@/components/drk/Application";
-import { BusinessEngine } from "@/components/drk/BusinessEngine";
 import { FinalCTA } from "@/components/drk/FinalCTA";
 
 /**
- * DRK — one descent, not fourteen sections.
+ * DRK — a front door, not a deck.
  *
- * `Undercurrent` is the persistent world: the same system runs beneath every
- * act for the whole document, revealing itself as you go down and retreating
- * at the end. `Seam` carries the signal across each join, so no act ever
- * simply stops and the next one starts.
+ * Seven acts. The job is to say what DRK is, show there is real
+ * infrastructure behind it, and make the reader get in touch. The
+ * application, the launch record, the economics and the raise are not on
+ * this site — they are shared privately, on request.
  *
- * The camera moves:
- *   MACRO → RESTRICTED → EXPANSION → DETAIL → QUIET → IMMERSION →
- *   COMPLEXITY → SATISFACTION → CONTINUITY → PRODUCT → DEPTH →
- *   SYSTEMIC → ACCELERATION → VOID
+ *   01 SURFACE         the system is already running
+ *   02 PROBLEM         opacity becomes observable
+ *   03 ENGINE          one system, different operators
+ *   04 SYSTEM          controlled glimpses of the product
+ *   05 INFRASTRUCTURE  descend beneath the interface
+ *   06 LIFECYCLE       the market moves, the system stays connected
+ *   07 CLOSE           everything converges, then the door
+ *
+ * `Undercurrent` is the persistent world beneath every act; `Seam` carries
+ * the signal across each join so the page reads as one descent.
  */
 export default function Page() {
   return (
@@ -39,54 +39,24 @@ export default function Page() {
       <Nav />
 
       <main id="main" className="relative z-10">
-        {/* MACRO — the system is already running */}
         <Hero />
-        <Seam from={0.5} to={0.34} label="Assets in" />
+        <Seam from={0.5} to={0.36} label="Assets in" />
 
-        {/* RESTRICTED — the black box */}
         <Problem />
-        <Seam from={0.34} to={0.5} label="Observable" />
+        <Seam from={0.36} to={0.5} label="Observable" />
 
-        {/* EXPANSION — one engine, two operators */}
         <EngineModel />
-        <Seam from={0.5} to={0.62} />
+        <Seam from={0.5} to={0.6} />
 
-        {/* DETAIL — attribution */}
-        <ProductProof />
-        <Seam from={0.62} to={0.28} label="Evidence" />
+        <System />
+        <Seam from={0.6} to={0.42} label="Beneath" />
 
-        {/* QUIET — the camera pulls back */}
-        <Evidence />
-        <Seam from={0.28} to={0.5} />
+        <Infrastructure />
+        <Seam from={0.42} to={0.5} />
 
-        {/* IMMERSION — the stack assembles */}
-        <Architecture />
-        <Seam from={0.5} to={0.7} />
-
-        {/* COMPLEXITY — the surface expands */}
-        <Market />
-        <Seam from={0.7} to={0.4} />
-
-        {/* SATISFACTION — activation */}
-        <Integration />
-        <Seam from={0.4} to={0.5} label="Active" />
-
-        {/* CONTINUITY — DRK stays connected */}
         <Lifecycle />
         <Seam from={0.5} to={0.5} />
 
-        {/* PRODUCT — the topology becomes the interface */}
-        <ControlLayer />
-        <Seam from={0.5} to={0.5} label="Deeper" />
-
-        {/* DEPTH — inside the runtime */}
-        <Application />
-        <Seam from={0.5} to={0.5} />
-
-        {/* SYSTEMIC + ACCELERATION — the engine returns, the loop widens */}
-        <BusinessEngine />
-
-        {/* VOID — everything goes beneath the surface */}
         <FinalCTA />
       </main>
     </>

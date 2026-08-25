@@ -111,23 +111,22 @@ Text contrast on the ground colour:
 | `ink-faint` | 5.1:1 | labels, captions, **all disclaimers** |
 | `ink-ghost` | 3.4:1 | decorative marks and pre-activation states only |
 
-## Video
+## Scope: this is a front door, not a deck
 
-Two real assets, shared with the pitch deck (`DRK/interactive-deck`):
+The site's job is to say what DRK is, show there is real infrastructure
+behind it, and make the reader get in touch. Deliberately **not** on this
+site — shared privately on request instead:
 
-- `public/intro.mp4` — the opening title card, played over the page as it
-  loads by `components/system/IntroCurtain.tsx`. Rendered in the server HTML
-  so the first painted frame *is* the card. It leaves on clip end, on any
-  click/tap/keypress, or on a hard 3.2s ceiling if the file never plays at
-  all; `prefers-reduced-motion` never sees it.
-- `public/demo/*.mp4` — six recordings of the **live DRK application**, one
-  per surface, driving Act 11. Not a mockup: each clip is one page of the real
-  product trimmed to its settled state.
+- the application walkthrough / demo reel
+- launch results and any P/L
+- economics, revenue and projections
+- the raise
+- market statistics
 
-Playback policy: `preload="none"` plus a real poster frame, and a clip only
-gets a `src` once it has been active — an unvisited act costs one image, not
-six videos. Exactly one `<video>` plays at any moment; leaving a clip pauses
-and rewinds it. Total asset weight is 1.5 MB.
+`public/intro.mp4` is the only video: a title card containing the wordmark
+and nothing else, played by `components/system/IntroCurtain.tsx`. It leaves
+on clip end, on any click/tap/keypress, or on a hard 3.2s ceiling if the file
+never plays; `prefers-reduced-motion` never sees it.
 
 ## Content rules
 
@@ -138,7 +137,10 @@ and rewinds it. Total asset weight is 1.5 MB.
    qualitative treatment instead of a fabricated number.
 2. **Search `pending: true`** to find everything awaiting founder approval
    before it can be published.
-3. **Contact details are never guessed.** The two Telegram handles in
+3. **Plain language.** "Runtime", "operating layer" and "telemetry" are
+   insider words that wash out for the people this page is for. Say what the
+   thing does: wallets, liquidity, trading, reporting.
+4. **Contact details are never guessed.** The two Telegram handles in
    `contact` are the real ones, taken verbatim from DRK's pitch deck build.
    There is deliberately no email address: a plausible-looking address that
    bounces is worse than none. A wrong handle sends an investor to a stranger.

@@ -70,14 +70,14 @@
     /* Composite material tokens — referenced by the .glass / .metal utilities */
     --surface-1: linear-gradient(
       158deg,
-      rgba(34, 37, 35, 0.62) 0%,
-      rgba(21, 23, 22, 0.72) 46%,
-      rgba(8, 13, 12, 0.86) 100%
+      rgba(34, 37, 35, 0.84) 0%,
+      rgba(21, 23, 22, 0.9) 46%,
+      rgba(8, 13, 12, 0.95) 100%
     );
     --surface-2: linear-gradient(
       158deg,
-      rgba(24, 29, 28, 0.5) 0%,
-      rgba(8, 13, 12, 0.8) 100%
+      rgba(24, 29, 28, 0.78) 0%,
+      rgba(8, 13, 12, 0.92) 100%
     );
     --highlight-inset: inset 0 1px 0 0 rgba(255, 255, 255, 0.13),
       inset 0 0 0 1px rgba(255, 255, 255, 0.02);
@@ -152,11 +152,12 @@
    ========================================================================= */
 @layer components {
   /* --- Smoked glass panel ------------------------------------------------ */
+  /* No `backdrop-filter`: the world behind these panels is an animated
+     canvas, and blurring animated content re-filters the whole surface every
+     frame. The gradients below are opaque enough to seat content on their own. */
   .glass {
     position: relative;
     background: var(--surface-1);
-    backdrop-filter: blur(14px) saturate(115%);
-    -webkit-backdrop-filter: blur(14px) saturate(115%);
     border: 1px solid rgba(255, 255, 255, 0.075);
     box-shadow: var(--highlight-inset), var(--depth-shadow);
   }

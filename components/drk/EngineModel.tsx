@@ -6,173 +6,116 @@ import { Orb, Node } from "@/components/system/Objects";
 import { engine } from "@/content/drk";
 
 /**
- * ACT 03 — ONE ENGINE, TWO OPERATING MODES
+ * ACT 03 — THE ENGINE
  *
- *   0.00 → 0.28   A single engine. Nothing has split yet.
- *   0.28 → 0.55   Two operating paths separate outward from the same core.
- *                 The core never duplicates — only the operator changes.
- *   0.55 → 0.78   The paths reconnect beneath into ONE RUNTIME.
- *   0.78 → 1.00   The two revenue outcomes emerge.
- *
- * Spatial choreography, not card hovers.
+ * One core, two operators. The engine never duplicates — it stays physically
+ * in the centre while two routes leave it and reconnect beneath. Nothing
+ * about revenue or business model appears here; that is deck material.
  */
 export function EngineModel() {
   return (
     <>
-      <Section id="engine" className="pt-28 sm:pt-36 lg:pt-44">
+      <Section id="engine" className="pt-28 sm:pt-36 lg:pt-40">
         <SectionHead
           eyebrow={engine.eyebrow}
           headline={
             <>
-              One proprietary engine.
+              {engine.headline[0]}
               <br />
-              <span className="text-ink-muted">Two scalable businesses.</span>
+              <span className="text-ink-muted">{engine.headline[1]}</span>
             </>
           }
-          body={engine.body}
         />
       </Section>
 
-      <PinnedStage length={2} compactLength={1.4} phase="Engine running" className="mt-16 sm:mt-20">
+      <PinnedStage length={2.2} compactLength={1.6} phase="Engine running" className="mt-10 sm:mt-14">
         <div className="relative flex h-full w-full items-center justify-center px-5 sm:px-8">
-          <div className="relative w-full max-w-[1000px]">
-            {/* ---- The core — one object, always ------------------------- */}
-            <div
-              className="relative z-20 mx-auto flex justify-center"
-              style={{
-                // Rises slightly as the modes split away beneath it.
-                transform:
-                  "translate3d(0, calc(clamp(0, calc((var(--p) - 0.26) / 0.3), 1) * -6vh), 0)",
-              }}
-            >
+          <div className="relative w-full max-w-[900px]">
+            {/* The core — one object, always */}
+            <div className="relative z-20 flex justify-center">
               <Orb
-                size={168}
-                className="sm:!h-[196px] sm:!w-[196px]"
-                style={{
-                  ["--orb-a" as string]: "clamp(0.35, calc(var(--p) / 0.25), 1)",
-                }}
+                size={140}
+                className="sm:!h-[168px] sm:!w-[168px]"
+                style={{ ["--orb-a" as string]: "clamp(0.35, calc(var(--p) / 0.24), 1)" }}
               />
             </div>
-            <p className="relative z-20 mt-6 text-center font-mono text-[9.5px] uppercase tracking-[0.28em] text-ink-faint">
-              Engine
-            </p>
 
-            {/* ---- Split bracket: one engine → two operators -------------
-                Right angles only. `preserveAspectRatio="none"` stretches the
-                box, and straight segments survive that distortion perfectly
-                where curves would not. */}
+            {/* Split: right angles only, so the stretched viewBox cannot warp them */}
             <svg
               aria-hidden
-              className="relative z-10 mt-5 hidden h-[72px] w-full sm:block"
-              viewBox="0 0 1000 72"
+              className="relative z-10 mt-5 hidden h-[64px] w-full sm:block"
+              viewBox="0 0 1000 64"
               preserveAspectRatio="none"
             >
-              <Bracket d="M500 0 V34 H180 V72" from={0.26} to={0.48} />
-              <Bracket d="M500 0 V34 H820 V72" from={0.3} to={0.52} />
+              <Bracket d="M500 0 V30 H190 V64" from={0.26} to={0.48} />
+              <Bracket d="M500 0 V30 H810 V64" from={0.3} to={0.52} />
             </svg>
 
-            {/* ---- The two operating modes ------------------------------- */}
-            <div className="relative z-20 mt-6 grid grid-cols-1 gap-6 sm:mt-4 sm:grid-cols-2 sm:gap-8 lg:gap-24">
+            {/* The two operators */}
+            <div className="relative z-20 mt-6 grid grid-cols-1 gap-7 sm:mt-4 sm:grid-cols-2 sm:gap-8 lg:gap-20">
               {engine.modes.map((mode, i) => {
                 const from = 0.3 + i * 0.05;
                 return (
                   <div
                     key={mode.id}
-                    className="band"
+                    className="band text-center sm:text-left"
                     style={{
                       ["--from" as string]: from,
                       ["--to" as string]: from + 0.16,
                       opacity: "var(--lp)",
-                      // Each mode slides outward from the core's centre line.
-                      transform: `translate3d(calc((1 - var(--le)) * ${i === 0 ? "8%" : "-8%"}), calc((1 - var(--le)) * -18px), 0)`,
+                      transform: `translate3d(calc((1 - var(--le)) * ${i === 0 ? "8%" : "-8%"}), 0, 0)`,
                     }}
                   >
-                    <div className="text-center sm:text-left">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-hero">
-                        {mode.key}
-                      </span>
-                      <h3 className="mt-3 font-display text-[19px] font-semibold leading-[1.15] tracking-[-0.025em] text-ink sm:text-[24px]">
-                        {mode.title}
-                      </h3>
-                      <p className="mx-auto mt-2.5 max-w-[34ch] text-[13.5px] leading-[1.6] text-ink-muted sm:mx-0">
-                        {mode.detail}
-                      </p>
-
-                      {/* Revenue outcome — emerges last */}
-                      <div
-                        className="band mt-5 inline-flex items-center gap-2.5"
-                        style={{
-                          ["--from" as string]: 0.8 + i * 0.04,
-                          ["--to" as string]: 0.92 + i * 0.04,
-                          opacity: "var(--lp)",
-                          transform: "translate3d(0, calc((1 - var(--le)) * 10px), 0)",
-                        }}
-                      >
-                        <span
-                          aria-hidden
-                          className="h-[5px] w-[5px] rounded-full bg-hero"
-                          style={{ boxShadow: "0 0 9px rgba(0,255,122,0.7)" }}
-                        />
-                        <span className="font-mono text-[11px] tracking-[0.06em] text-ink">
-                          {mode.revenue}
-                        </span>
-                      </div>
-                    </div>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-hero">
+                      {mode.key}
+                    </span>
+                    <h3 className="mt-3 font-display text-[20px] font-semibold leading-[1.15] tracking-[-0.025em] text-ink sm:text-[26px]">
+                      {mode.title}
+                    </h3>
+                    <p className="mx-auto mt-2.5 max-w-[32ch] text-[14px] leading-[1.6] text-ink-muted sm:mx-0">
+                      {mode.detail}
+                    </p>
                   </div>
                 );
               })}
             </div>
 
-            {/* ---- Reconnect bracket: both operators → one runtime -------- */}
+            {/* Reconnect */}
             <svg
               aria-hidden
-              className="relative z-10 mt-2 hidden h-[64px] w-full sm:block"
-              viewBox="0 0 1000 64"
+              className="relative z-10 mt-3 hidden h-[56px] w-full sm:block"
+              viewBox="0 0 1000 56"
               preserveAspectRatio="none"
             >
-              <Bracket d="M180 0 V32 H500 V64" from={0.6} to={0.78} />
-              <Bracket d="M820 0 V32 H500 V64" from={0.64} to={0.82} />
+              <Bracket d="M190 0 V28 H500 V56" from={0.58} to={0.76} />
+              <Bracket d="M810 0 V28 H500 V56" from={0.62} to={0.8} />
             </svg>
 
-            {/* ---- ONE RUNTIME — the reconnection ------------------------ */}
             <div
-              className="band relative z-20 mt-5 flex justify-center sm:mt-1"
+              className="band relative z-20 mt-6 flex flex-col items-center gap-3 sm:mt-1"
               style={{
                 ["--from" as string]: 0.74,
-                ["--to" as string]: 0.88,
+                ["--to" as string]: 0.9,
                 opacity: "var(--lp)",
-                transform: "translate3d(0, calc((1 - var(--le)) * 14px), 0)",
+                transform: "translate3d(0, calc((1 - var(--le)) * 12px), 0)",
               }}
             >
-              <Node tone="on">One runtime</Node>
+              <Node tone="on">Same system</Node>
+              <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-ink-faint">
+                {engine.payoff.join("  ·  ")}
+              </p>
             </div>
           </div>
         </div>
       </PinnedStage>
-
-      {/* The concept, stated once the choreography has made it */}
-      <Section className="pb-28 pt-16 sm:pb-36 lg:pb-44">
-        <p className="display mx-auto max-w-[760px] text-center text-[clamp(1.25rem,2.9vw,2rem)] text-ink">
-          The engine remains one engine.{" "}
-          <span className="text-ink-faint">Only the operator changes.</span>
-        </p>
-      </Section>
     </>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-
 function Bracket({ d, from, to }: { d: string; from: number; to: number }) {
   return (
     <g style={{ ["--from" as string]: from, ["--to" as string]: to, ["--len" as string]: 420 }}>
-      <path
-        d={d}
-        fill="none"
-        stroke="rgba(255,255,255,0.075)"
-        strokeWidth="1"
-        vectorEffect="non-scaling-stroke"
-      />
+      <path d={d} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
       <path
         className="band band-draw"
         d={d}
@@ -180,7 +123,7 @@ function Bracket({ d, from, to }: { d: string; from: number; to: number }) {
         stroke="var(--color-hero)"
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
-        style={{ filter: "drop-shadow(0 0 3px rgba(0,255,122,0.85))" }}
+        style={{ filter: "drop-shadow(0 0 3px rgba(0,255,122,0.8))" }}
       />
     </g>
   );

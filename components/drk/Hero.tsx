@@ -6,7 +6,7 @@ import { Chip } from "@/components/ui/Primitives";
 import { usePointerVars, useIsCompact, useStage } from "@/lib/scroll";
 import { hero, brand } from "@/content/drk";
 
-const RUNTIME = ["Wallets", "Liquidity", "Execution", "Reporting"] as const;
+const SIGNALS = hero.signals;
 
 /**
  * ACT 01 — SYSTEM ACTIVATION
@@ -124,7 +124,7 @@ export function Hero() {
         }}
       >
         <div style={enter(1, 14)}>
-          <Chip tone="live">Runtime operational</Chip>
+          <Chip tone="live">System live</Chip>
         </div>
 
         <p className="eyebrow mt-7 max-w-[420px]" style={enter(2, 18)}>
@@ -187,9 +187,9 @@ export function Hero() {
           </p>
         </div>
 
-        {/* ---- Runtime chain: connected nodes, not four fades -------------- */}
+        {/* ---- The four signals, wired in series ------------------------- */}
         <div className="mt-10" style={enter(7, 16)}>
-          <RuntimeChain lit={t} />
+          <SignalChain lit={t} />
         </div>
 
         <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5" style={enter(7, 20)}>
@@ -237,10 +237,10 @@ export function Hero() {
 /* The four runtime capabilities, wired in series                             */
 /* -------------------------------------------------------------------------- */
 
-function RuntimeChain({ lit }: { lit: number }) {
+function SignalChain({ lit }: { lit: number }) {
   return (
     <div className="flex flex-wrap items-center gap-y-3">
-      {RUNTIME.map((label, i) => {
+      {SIGNALS.map((label, i) => {
         // Each node lights a beat after the previous one.
         const on = lit >= 7 || lit >= 99;
         const delay = 120 + i * 190;
@@ -279,7 +279,7 @@ function RuntimeChain({ lit }: { lit: number }) {
               </span>
             </span>
 
-            {i < RUNTIME.length - 1 && (
+            {i < SIGNALS.length - 1 && (
               /* Connector: fills left→right, so the chain reads as wired */
               <span
                 aria-hidden

@@ -100,7 +100,7 @@ export function Nav() {
           <div className="flex items-center gap-3">
             <div className="hidden sm:block">
               <Button href="#contact" size="md" variant="primary">
-                Let&apos;s talk
+                Contact
               </Button>
             </div>
 
@@ -179,7 +179,7 @@ export function Nav() {
             }}
           >
             <Button href="#contact" size="lg" variant="primary">
-              Let&apos;s talk
+              Contact
             </Button>
           </div>
         </nav>
