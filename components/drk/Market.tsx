@@ -88,10 +88,10 @@ export function Market() {
                       x2={NODES[b].x}
                       y2={NODES[b].y}
                       stroke="var(--color-hero)"
-                      strokeWidth="0.22"
+                      strokeWidth="0.18"
                       style={{
                         ["--on" as string]: on,
-                        opacity: "calc(var(--on) * 0.4)",
+                        opacity: "calc(var(--on) * 0.22)",
                       }}
                     />
                   );
@@ -105,20 +105,20 @@ export function Market() {
                       <circle
                         cx={nd.x}
                         cy={nd.y}
-                        r={nd.r * 2.4}
-                        fill="rgba(0,255,122,0.07)"
-                        style={{ opacity: "var(--on)" }}
+                        r={nd.r * 1.9}
+                        fill="rgba(0,255,122,0.028)"
+                        style={{ opacity: "calc(var(--on) * 0.7)" }}
                       />
                       <circle
                         cx={nd.x}
                         cy={nd.y}
-                        r={nd.r}
+                        r={nd.r * 0.58}
                         fill={i === 0 ? "var(--color-tint)" : "var(--color-hero)"}
                         style={{
-                          opacity: "var(--on)",
+                          opacity: "calc(var(--on) * 0.55)",
                           transform: `scale(calc(0.4 + var(--on) * 0.6))`,
                           transformOrigin: `${nd.x}px ${nd.y}px`,
-                          filter: "drop-shadow(0 0 2px rgba(0,255,122,0.9))",
+                          filter: "drop-shadow(0 0 2px rgba(0,255,122,0.45))",
                         }}
                       />
                     </g>

@@ -49,7 +49,7 @@ export function Architecture() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(52% 48% at 50% 52%, rgba(0,255,122,0.11), transparent 72%)",
+                "radial-gradient(52% 48% at 50% 52%, rgba(0,255,122,0.05), transparent 72%)",
               opacity: "var(--p)",
               filter: "blur(20px)",
             }}

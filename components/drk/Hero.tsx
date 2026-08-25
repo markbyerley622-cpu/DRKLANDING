@@ -68,7 +68,7 @@ export function Hero() {
         <div
           className="grid-field absolute inset-0"
           style={{
-            opacity: `calc(0.6 * (1 - var(--p)))`,
+            opacity: `calc(0.34 * (1 - var(--p)))`,
             maskImage: "radial-gradient(90% 70% at 50% 45%, black 0%, transparent 78%)",
             WebkitMaskImage:
               "radial-gradient(90% 70% at 50% 45%, black 0%, transparent 78%)",
@@ -94,7 +94,7 @@ export function Hero() {
               opacity: `calc(1 - var(--p) * 0.75)`,
             }}
           >
-            <LiquidityField intensity={compact ? 0.55 : 0.8} />
+            <LiquidityField intensity={compact ? 0.3 : 0.45} />
           </div>
         </div>
 
@@ -102,7 +102,7 @@ export function Hero() {
           className="absolute inset-x-0 bottom-0 h-1/2"
           style={{
             background:
-              "radial-gradient(60% 100% at 62% 100%, rgba(0,255,122,0.08), transparent 70%)",
+              "radial-gradient(60% 100% at 62% 100%, rgba(0,255,122,0.035), transparent 70%)",
             opacity: `calc(1 - var(--p))`,
           }}
         />

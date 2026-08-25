@@ -58,7 +58,7 @@ export function Application() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(48% 44% at 50% 50%, rgba(0,255,122,0.10), transparent 70%)",
+                "radial-gradient(48% 44% at 50% 50%, rgba(0,255,122,0.045), transparent 70%)",
               opacity: "calc(0.3 + var(--p) * 0.7)",
               filter: "blur(22px)",
             }}

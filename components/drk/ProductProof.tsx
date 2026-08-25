@@ -127,7 +127,7 @@ export function ProductProof() {
               className="pointer-events-none absolute inset-x-0 -bottom-14 -top-10"
               style={{
                 background:
-                  "radial-gradient(58% 55% at 50% 55%, rgba(0,255,122,0.10), transparent 72%)",
+                  "radial-gradient(58% 55% at 50% 55%, rgba(0,255,122,0.045), transparent 72%)",
                 opacity: "clamp(0.25, var(--p), 1)",
                 filter: "blur(18px)",
               }}

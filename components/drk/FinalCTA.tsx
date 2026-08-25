@@ -48,13 +48,13 @@ export function FinalCTA() {
               opacity: "calc(0.8 - var(--p) * 0.42)",
             }}
           >
-            <LiquidityField intensity={compact ? 0.4 : 0.6} />
+            <LiquidityField intensity={compact ? 0.22 : 0.34} />
           </div>
           <div
             className="absolute inset-x-0 bottom-0 h-1/2"
             style={{
               background:
-                "radial-gradient(55% 100% at 50% 112%, rgba(0,255,122,0.14), transparent 68%)",
+                "radial-gradient(55% 100% at 50% 112%, rgba(0,255,122,0.06), transparent 68%)",
               opacity: "calc(0.5 + var(--p) * 0.5)",
             }}
           />

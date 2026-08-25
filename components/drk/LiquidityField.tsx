@@ -143,19 +143,20 @@ export function LiquidityField({
         X(route.p3[0]), Y(route.p3[1]),
       );
 
-      // Bloom pass — wide, soft, low alpha.
+      // Bloom pass — wide, very soft. This is atmosphere sitting behind type,
+      // so it stays near the noise floor rather than reading as a light show.
       if (route.green > 0.2) {
-        ctx.strokeStyle = greenAt(route.green, route.alpha * 0.1 * intensity);
-        ctx.lineWidth = route.width * 14;
+        ctx.strokeStyle = greenAt(route.green, route.alpha * 0.04 * intensity);
+        ctx.lineWidth = route.width * 16;
         ctx.stroke();
-        ctx.strokeStyle = greenAt(route.green, route.alpha * 0.16 * intensity);
-        ctx.lineWidth = route.width * 5;
+        ctx.strokeStyle = greenAt(route.green, route.alpha * 0.06 * intensity);
+        ctx.lineWidth = route.width * 6;
         ctx.stroke();
       }
 
-      // Core pass — the crisp filament.
-      ctx.strokeStyle = greenAt(route.green, route.alpha * 0.85 * intensity);
-      ctx.lineWidth = route.width;
+      // Core pass — a fine filament, not a stroke of light.
+      ctx.strokeStyle = greenAt(route.green, route.alpha * 0.42 * intensity);
+      ctx.lineWidth = route.width * 0.85;
       ctx.stroke();
     };
 
@@ -180,8 +181,8 @@ export function LiquidityField({
       const [tx, ty] = at(tail);
       const grad = ctx.createLinearGradient(tx, ty, hx, hy);
       grad.addColorStop(0, "rgba(0,255,122,0)");
-      grad.addColorStop(0.6, `rgba(57,255,154,${0.28 * intensity})`);
-      grad.addColorStop(1, `rgba(230,255,241,${0.95 * intensity})`);
+      grad.addColorStop(0.6, `rgba(57,255,154,${0.12 * intensity})`);
+      grad.addColorStop(1, `rgba(230,255,241,${0.42 * intensity})`);
 
       ctx.beginPath();
       const steps = 12;
@@ -190,19 +191,20 @@ export function LiquidityField({
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
       ctx.strokeStyle = grad;
-      ctx.lineWidth = pulse.size;
+      ctx.lineWidth = pulse.size * 0.8;
       ctx.lineCap = "round";
       ctx.stroke();
 
-      // Head node
+      // Head node — small and dim; it should register as movement caught in
+      // peripheral vision, not as a bright dot competing with the headline.
       ctx.beginPath();
-      ctx.arc(hx, hy, pulse.size * 1.15, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(230,255,241,${0.9 * intensity})`;
+      ctx.arc(hx, hy, pulse.size * 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(230,255,241,${0.4 * intensity})`;
       ctx.fill();
 
       ctx.beginPath();
-      ctx.arc(hx, hy, pulse.size * 5, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0,255,122,${0.09 * intensity})`;
+      ctx.arc(hx, hy, pulse.size * 4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,255,122,${0.035 * intensity})`;
       ctx.fill();
     };
 

@@ -202,7 +202,7 @@ export function CompoundingLoop() {
                 transform="rotate(-90 50 50)"
                 strokeDasharray={2 * Math.PI * R}
                 strokeDashoffset={`calc(${2 * Math.PI * R} * (1 - clamp(0, calc(var(--p) / 0.66), 1)))`}
-                style={{ filter: "drop-shadow(0 0 2px rgba(0,255,122,0.8))" }}
+                style={{ filter: "drop-shadow(0 0 2px rgba(0,255,122,0.4))", opacity: 0.8 }}
               />
 
               {/* packet circulating once the loop closes */}
@@ -229,7 +229,7 @@ export function CompoundingLoop() {
                 const on = `clamp(0, calc((var(--p) - ${station(i).toFixed(3)}) / 0.06), 1)`;
                 return (
                   <g key={label} style={{ ["--on" as string]: on }}>
-                    <circle cx={x} cy={y} r="4" fill="rgba(0,255,122,0.1)" style={{ opacity: "var(--on)" }} />
+                    <circle cx={x} cy={y} r="4" fill="rgba(0,255,122,0.05)" style={{ opacity: "var(--on)" }} />
                     <circle
                       cx={x}
                       cy={y}
@@ -247,7 +247,7 @@ export function CompoundingLoop() {
                 cy="50"
                 r="9"
                 fill="none"
-                stroke="rgba(0,255,122,0.28)"
+                stroke="rgba(0,255,122,0.16)"
                 strokeWidth="0.4"
                 style={{
                   transform: "scale(calc(0.6 + var(--p) * 0.7))",
@@ -259,7 +259,7 @@ export function CompoundingLoop() {
                 cx="50"
                 cy="50"
                 r="4"
-                fill="rgba(0,255,122,0.5)"
+                fill="rgba(0,255,122,0.3)"
                 style={{
                   transform: "scale(calc(0.5 + var(--p) * 0.9))",
                   transformOrigin: "50px 50px",

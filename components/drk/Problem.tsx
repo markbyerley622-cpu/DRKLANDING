@@ -75,7 +75,7 @@ export function Problem() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(58% 52% at 50% 52%, rgba(0,255,122,0.09), transparent 72%)",
+                "radial-gradient(58% 52% at 50% 52%, rgba(0,255,122,0.042), transparent 72%)",
               opacity: "clamp(0, calc((var(--p) - 0.5) / 0.35), 1)",
             }}
           />
