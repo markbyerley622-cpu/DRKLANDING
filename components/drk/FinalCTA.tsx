@@ -6,7 +6,16 @@ import { LiquidityField } from "./LiquidityField";
 import { Logo } from "./Logo";
 import { Scrub } from "@/components/system/Stage";
 import { useIsCompact } from "@/lib/scroll";
-import { closing, footer, brand } from "@/content/drk";
+import { closing, footer, brand, contact } from "@/content/drk";
+
+/** Telegram glyph. Inlined so the contact block costs no extra request. */
+function TelegramIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <path d="M21.94 4.6 18.9 19.2c-.23 1.02-.84 1.27-1.7.79l-4.7-3.46-2.27 2.18c-.25.25-.46.46-.94.46l.34-4.78L18.4 6.9c.38-.34-.08-.53-.59-.19L7.05 13.4l-4.63-1.45c-1-.32-1.02-1 .21-1.49l18.1-6.98c.84-.3 1.57.2 1.21 1.12Z" />
+    </svg>
+  );
+}
 
 /**
  * ACT 14 — EVERYTHING COLLAPSES INTO ONE STATEMENT
@@ -88,7 +97,9 @@ export function FinalCTA() {
               traders behind it.
             </p>
 
-            {/* ---- CONTACT — plainly visible, not buried in a button ----- */}
+            {/* ---- CONTACT — the two Telegram handles, at display size ---
+                These are DRK's only supplied contact details and they are the
+                real ones. Shown as readable text, not buried behind a label. */}
             <div
               className="mt-14 flex w-full flex-col items-center"
               style={{
@@ -98,48 +109,48 @@ export function FinalCTA() {
               }}
             >
               <span className="font-mono text-[9.5px] uppercase tracking-[0.26em] text-ink-faint">
-                Contact
+                {contact.label}
               </span>
+              <p className="mt-3 text-[14px] text-ink-muted">{contact.strap}</p>
 
-              <a
-                href={`mailto:${brand.contactEmail}`}
-                className="group mt-4 inline-block"
-                aria-label={`Email DRK at ${brand.contactEmail}`}
-              >
-                <span
-                  className="display block text-[clamp(1.5rem,5.4vw,3.1rem)] text-ink transition-colors duration-500 group-hover:text-tint"
-                  style={{ textShadow: "0 0 44px rgba(0,255,122,0.18)" }}
+              <ul className="mt-8 flex w-full flex-col items-center gap-5 sm:flex-row sm:justify-center sm:gap-12">
+                {contact.people.map((person) => (
+                  <li key={person.key}>
+                    <a
+                      href={person.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group inline-flex flex-col items-center"
+                      aria-label={`Message ${person.handle} on Telegram`}
+                    >
+                      <span className="inline-flex items-center gap-2.5">
+                        <TelegramIcon className="h-[18px] w-[18px] shrink-0 text-ink-faint transition-colors duration-500 group-hover:text-hero sm:h-5 sm:w-5" />
+                        <span
+                          className="display text-[clamp(1.25rem,4.2vw,2.3rem)] text-ink transition-colors duration-500 group-hover:text-tint"
+                          style={{ textShadow: "0 0 44px rgba(0,255,122,0.18)" }}
+                        >
+                          {person.handle}
+                        </span>
+                      </span>
+                      <span
+                        aria-hidden
+                        className="mt-2 block h-px w-full origin-center scale-x-[0.55] bg-hero/35 transition-all duration-700 ease-[var(--ease-drk)] group-hover:scale-x-100 group-hover:bg-hero/90"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-11">
+                <Button
+                  href={contact.people[0].url}
+                  size="lg"
+                  variant="primary"
+                  ariaLabel={`Message ${contact.people[0].handle} on Telegram`}
                 >
-                  {brand.contactEmail}
-                </span>
-                <span
-                  aria-hidden
-                  className="mt-2 block h-px w-full origin-left scale-x-100 bg-hero/40 transition-all duration-700 ease-[var(--ease-drk)] group-hover:bg-hero/90"
-                />
-              </a>
-
-              <div className="mt-9">
-                <Button href={`mailto:${brand.contactEmail}`} size="lg" variant="primary">
                   {closing.cta.label}
                 </Button>
               </div>
-
-              {/* Channels render only once approved handles exist */}
-              {!closing.channelsPending && closing.channels.length > 0 && (
-                <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3">
-                  {closing.channels.map((c) => (
-                    <li key={c.handle}>
-                      <a
-                        href={c.href}
-                        className="inline-flex items-center gap-2.5 font-mono text-[12px] tracking-[0.06em] text-ink-muted transition-colors duration-500 hover:text-hero"
-                      >
-                        <span className="text-ink-faint">{c.label}</span>
-                        {c.handle}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           </div>
         </div>
@@ -177,12 +188,18 @@ export function FinalCTA() {
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <a
-              href={`mailto:${brand.contactEmail}`}
-              className="font-mono text-[10.5px] tracking-[0.06em] text-ink-muted transition-colors duration-500 hover:text-hero"
-            >
-              {brand.contactEmail}
-            </a>
+            {contact.people.map((person) => (
+              <a
+                key={person.key}
+                href={person.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-mono text-[10.5px] tracking-[0.06em] text-ink-muted transition-colors duration-500 hover:text-hero"
+              >
+                <TelegramIcon className="h-3 w-3" />
+                {person.handle}
+              </a>
+            ))}
             <span aria-hidden className="hidden h-3 w-px bg-white/10 sm:block" />
             <span className="font-mono text-[10px] tracking-[0.1em] text-ink-faint">
               {footer.legal}

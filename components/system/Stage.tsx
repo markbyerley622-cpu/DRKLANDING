@@ -27,6 +27,8 @@ export function PinnedStage({
   frameClassName = "",
   id,
   phase,
+  steps,
+  onStep,
   style,
 }: {
   children: ReactNode;
@@ -37,10 +39,17 @@ export function PinnedStage({
   id?: string;
   /** System-telemetry state this stage represents while on screen. */
   phase?: string;
+  /**
+   * Emit a discrete index 0..steps-1 as progress crosses each band. This is
+   * the ONLY channel allowed to touch React state during a scroll — use it
+   * for things CSS cannot express, like which <video> should be playing.
+   */
+  steps?: number;
+  onStep?: (index: number) => void;
   style?: CSSProperties;
 }) {
   const reduced = useReducedMotion();
-  const ref = useStage<HTMLDivElement>({ mode: "pin" });
+  const ref = useStage<HTMLDivElement>({ mode: "pin", steps, onStep });
 
   if (reduced) {
     return (

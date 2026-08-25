@@ -1,4 +1,5 @@
 import { Nav } from "@/components/drk/Nav";
+import { IntroCurtain } from "@/components/system/IntroCurtain";
 import { SystemTelemetry } from "@/components/system/SystemTelemetry";
 import { Hero } from "@/components/drk/Hero";
 import { Problem } from "@/components/drk/Problem";
@@ -21,6 +22,7 @@ import { FinalCTA } from "@/components/drk/FinalCTA";
 export default function Page() {
   return (
     <>
+      <IntroCurtain />
       <SystemTelemetry />
       <Nav />
 

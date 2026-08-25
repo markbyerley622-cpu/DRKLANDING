@@ -93,6 +93,24 @@ Text contrast on the ground colour:
 | `ink-faint` | 5.1:1 | labels, captions, **all disclaimers** |
 | `ink-ghost` | 3.4:1 | decorative marks and pre-activation states only |
 
+## Video
+
+Two real assets, shared with the pitch deck (`DRK/interactive-deck`):
+
+- `public/intro.mp4` — the opening title card, played over the page as it
+  loads by `components/system/IntroCurtain.tsx`. Rendered in the server HTML
+  so the first painted frame *is* the card. It leaves on clip end, on any
+  click/tap/keypress, or on a hard 3.2s ceiling if the file never plays at
+  all; `prefers-reduced-motion` never sees it.
+- `public/demo/*.mp4` — six recordings of the **live DRK application**, one
+  per surface, driving Act 11. Not a mockup: each clip is one page of the real
+  product trimmed to its settled state.
+
+Playback policy: `preload="none"` plus a real poster frame, and a clip only
+gets a `src` once it has been active — an unvisited act costs one image, not
+six videos. Exactly one `<video>` plays at any moment; leaving a clip pauses
+and rewinds it. Total asset weight is 1.5 MB.
+
 ## Content rules
 
 `content/drk.ts` is the only place copy or data lives. Two rules hold:
@@ -102,6 +120,10 @@ Text contrast on the ground colour:
    qualitative treatment instead of a fabricated number.
 2. **Search `pending: true`** to find everything awaiting founder approval
    before it can be published.
+3. **Contact details are never guessed.** The two Telegram handles in
+   `contact` are the real ones, taken verbatim from DRK's pitch deck build.
+   There is deliberately no email address: a plausible-looking address that
+   bounces is worse than none. A wrong handle sends an investor to a stranger.
 
 ## Accessibility
 

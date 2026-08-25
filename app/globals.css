@@ -396,6 +396,47 @@
   }
 }
 
+/* ---- Opening curtain ---------------------------------------------------- */
+
+/* Fills across the card's full run. Paused the moment the card starts to
+   leave, so it never appears to reset. */
+.drk-boot-fill {
+  transform: scaleX(0);
+  animation: drk-boot-fill 3.2s linear forwards;
+}
+
+@keyframes drk-boot-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Each boot line holds for its own beat, then hands over to the next. */
+.drk-boot-line {
+  opacity: 0;
+  animation: drk-boot-line 2.1s var(--ease-drk) forwards;
+}
+
+@keyframes drk-boot-line {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  12%,
+  22% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  34%,
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
 /* A packet circulating a closed ring. */
 @keyframes drk-orbit {
   from {

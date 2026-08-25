@@ -5,9 +5,12 @@
  *
  * RULE: nothing in this file may be invented. Where the supplied brief
  * referenced data that was NOT actually provided (launch P/L, market
- * statistics, three-year projections, revenue figures, Telegram handles), the
- * entry carries `pending: true` and the UI renders a qualitative,
- * non-numeric treatment instead of a fabricated one.
+ * statistics, three-year projections, revenue figures), the entry carries
+ * `pending: true` and the UI renders a qualitative, non-numeric treatment
+ * instead of a fabricated one.
+ *
+ * The Telegram handles in `contact` ARE real — sourced from DRK's own pitch
+ * deck build, not guessed.
  *
  * Search this file for `pending: true` to find everything awaiting
  * founder approval before it can go public.
@@ -26,8 +29,57 @@ export const brand = {
    */
   surfaceLine: "Liquidity beneath the surface.",
   positioning: "Programmatic trading & liquidity infrastructure for market operations.",
-  contactEmail: "hello@drk.io", // pending: confirm the real inbound address
-  contactPending: true,
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* CONTACT                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The two Telegram handles are the ONLY contact details DRK has supplied, and
+ * they are the real ones — taken verbatim from the pitch deck build
+ * (`DRK/interactive-deck/content/drk.ts`).
+ *
+ * They are never derived, completed or guessed. A wrong handle sends an
+ * investor to a stranger.
+ *
+ * There is deliberately NO email address here: the one previously on this site
+ * was a placeholder, and a plausible-looking address that bounces is worse
+ * than no address at all.
+ */
+export const contact = {
+  label: "Contact",
+  title: "Talk to us",
+  strap: "Direct line to the team.",
+  people: [
+    { key: "unicorn", handle: "@unicorrrrnnnnn", url: "https://t.me/unicorrrrnnnnn" },
+    { key: "gokusan", handle: "@GokuSan0x", url: "https://t.me/GokuSan0x" },
+  ],
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* OPENING CURTAIN                                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * DRK's own title card, played over the page as it loads. Same asset the
+ * pitch deck opens with, so the two properties introduce themselves
+ * identically.
+ *
+ * The boot lines are BRAND LANGUAGE, NOT TELEMETRY. Nothing is actually being
+ * initialised, connected or synced while they are on screen, and none of them
+ * names a venue, chain, counterparty or figure — so none can be read as a
+ * claim about a running system.
+ */
+export const curtain = {
+  src: "/intro.mp4",
+  skip: "Skip",
+  boot: [
+    "Initializing core",
+    "Connecting markets",
+    "Syncing liquidity",
+    "System ready",
+  ],
 } as const;
 
 export const nav = [
@@ -415,8 +467,59 @@ export const application = {
   eyebrow: "10 — The application",
   headline: "The system behind the operation.",
   body:
-    "One environment. The token, the runtime that trades it, the pools it lives in, the programs acting on it, and the result.",
-  rail: ["Token", "Runtime", "Pools", "Programs", "Operate", "P/L"] as const,
+    "Six surfaces of the live DRK application, recorded in production.",
+  note: "Recorded in the live DRK application.",
+  /**
+   * THE DEMO REEL — real footage, not a mockup.
+   *
+   * Cut from DRK's own screen recording of the live application. Each clip is
+   * one page of the real product, trimmed to its settled state; the runtime's
+   * loading screens between pages are cut out and that is the only edit made.
+   * Nothing is re-shot, re-staged or composited.
+   *
+   * Every `copy` line restates what that page of the product says about itself
+   * on screen. No capability is described that the recording does not show.
+   *
+   * Source: DRK/interactive-deck — same assets as the pitch deck.
+   */
+  clips: [
+    {
+      key: "token-profile",
+      rail: "Token",
+      name: "Token profile",
+      copy: "Market, ownership, liquidity and safety for one managed token — with the evidence behind each figure.",
+    },
+    {
+      key: "instances",
+      rail: "Runtime",
+      name: "Runtime instances",
+      copy: "Every trading pair and wallet group runs as its own live scope, started and paused independently.",
+    },
+    {
+      key: "pools",
+      rail: "Pools",
+      name: "Pool discovery",
+      copy: "Venues and pools are discovered, authorised per instance, and monitored from the moment they connect.",
+    },
+    {
+      key: "programs",
+      rail: "Programs",
+      name: "Activity programs",
+      copy: "A strategy is configured, scheduled and checked against the live market before a single order is placed.",
+    },
+    {
+      key: "studio",
+      rail: "Operate",
+      name: "Operator studio",
+      copy: "Reactions are previewed and tested — external event to typed action — without touching the chain.",
+    },
+    {
+      key: "pl",
+      rail: "P/L",
+      name: "Positions & P/L",
+      copy: "Reconciled fills, fresh marks and attributed P/L on the instance while it runs.",
+    },
+  ],
 } as const;
 
 /* -------------------------------------------------------------------------- */
@@ -509,9 +612,7 @@ export const closing = {
   headline: "The next market operator is not a black box.",
   statement: "It is a transparent operating system with traders behind it.",
   cta: { label: "Let's talk", href: "#contact" },
-  /** pending: Telegram handles were referenced but not supplied. */
-  channelsPending: true,
-  channels: [] as { label: string; handle: string; href: string }[],
+  /** Contact channels live in `contact` above — the real Telegram handles. */
   signOff: "Liquidity beneath the surface.",
 } as const;
 
