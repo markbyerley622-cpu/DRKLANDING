@@ -1,0 +1,397 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   DRK DESIGN TOKENS
+   Palette extracted directly from the supplied brand system sheet (v1.0).
+   Dark neutrals + signature greens. Nothing here is invented.
+   ========================================================================= */
+
+@theme {
+  /* --- Dark neutrals ----------------------------------------------------- */
+  --color-obsidian: #080d0c;
+  --color-carbon: #0f1110;
+  --color-graphite: #151716;
+  --color-slate: #181d1c;
+  --color-smoke: #222523;
+
+  /* --- Signature greens -------------------------------------------------- */
+  --color-hero: #00ff7a;
+  --color-signal: #39ff9a;
+  --color-deep: #0fcc6a;
+  --color-mint: #88ffd8;
+  --color-tint: #e6fff1;
+
+  /* --- Text -------------------------------------------------------------- */
+  /**
+   * Contrast on the #080d0c ground (measured, not estimated):
+   *   ink        18.4:1   headings + primary copy
+   *   ink-muted   7.5:1   body copy
+   *   ink-faint   5.1:1   labels, captions, eyebrows, ALL disclaimers
+   *   ink-ghost   3.4:1   decorative marks and pre-activation states only —
+   *                       never the resting colour of text that must be read
+   */
+  --color-ink: #f4f7f5;
+  --color-ink-muted: #9aa3a0;
+  --color-ink-faint: #7a8481;
+  --color-ink-ghost: #626b68;
+
+  /* --- Hairlines / edges ------------------------------------------------- */
+  --color-edge: rgba(255, 255, 255, 0.08);
+  --color-edge-strong: rgba(255, 255, 255, 0.16);
+  --color-edge-green: rgba(0, 255, 122, 0.28);
+
+  /* --- Type -------------------------------------------------------------- */
+  --font-display: var(--font-archivo), "Archivo", "Helvetica Neue", sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-plex), "IBM Plex Mono", ui-monospace, monospace;
+
+  /* --- Motion timing ----------------------------------------------------- */
+  --ease-drk: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-drk-in: cubic-bezier(0.6, 0, 0.34, 1);
+
+  /* --- Radii ------------------------------------------------------------- */
+  --radius-glass: 14px;
+  --radius-panel: 20px;
+}
+
+@layer base {
+  :root {
+    /* Composite material tokens — referenced by the .glass / .metal utilities */
+    --surface-1: linear-gradient(
+      158deg,
+      rgba(34, 37, 35, 0.62) 0%,
+      rgba(21, 23, 22, 0.72) 46%,
+      rgba(8, 13, 12, 0.86) 100%
+    );
+    --surface-2: linear-gradient(
+      158deg,
+      rgba(24, 29, 28, 0.5) 0%,
+      rgba(8, 13, 12, 0.8) 100%
+    );
+    --highlight-inset: inset 0 1px 0 0 rgba(255, 255, 255, 0.13),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    --depth-shadow: 0 30px 70px -28px rgba(0, 0, 0, 0.95),
+      0 2px 10px -4px rgba(0, 0, 0, 0.7);
+    --glow-hero: 0 0 24px -2px rgba(0, 255, 122, 0.35);
+
+    /* Header offset, used by scroll-margin so anchors land cleanly */
+    --nav-h: 72px;
+  }
+
+  * {
+    border-color: var(--color-edge);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-obsidian);
+    /* `clip` rather than `hidden`: contains decorative bleed without turning
+       the root into a scroll container (which would break sticky/anchor). */
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--color-obsidian);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  section {
+    scroll-margin-top: calc(var(--nav-h) + 24px);
+  }
+
+  ::selection {
+    background: rgba(0, 255, 122, 0.24);
+    color: var(--color-tint);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-hero);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Scrollbar — thin, graphite, matches the material system */
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-obsidian);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #232826;
+    border-radius: 99px;
+    border: 2px solid var(--color-obsidian);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333936;
+  }
+}
+
+/* ============================================================================
+   MATERIAL UTILITIES
+   ========================================================================= */
+@layer components {
+  /* --- Smoked glass panel ------------------------------------------------ */
+  .glass {
+    position: relative;
+    background: var(--surface-1);
+    backdrop-filter: blur(14px) saturate(115%);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    box-shadow: var(--highlight-inset), var(--depth-shadow);
+  }
+
+  .glass-quiet {
+    position: relative;
+    background: var(--surface-2);
+    border: 1px solid rgba(255, 255, 255, 0.055);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+  }
+
+  /* --- Metallic rim (brushed-chrome edge from the reference sheet) -------- */
+  .metal-rim {
+    border: 1px solid transparent;
+    background:
+      var(--surface-1) padding-box,
+      linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.42) 0%,
+          rgba(255, 255, 255, 0.1) 22%,
+          rgba(255, 255, 255, 0.02) 55%,
+          rgba(255, 255, 255, 0.06) 82%,
+          rgba(255, 255, 255, 0.2) 100%
+        )
+        border-box;
+  }
+
+  /* --- Specular sweep: a slow reflection crossing a glass surface --------- */
+  .specular::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      104deg,
+      transparent 32%,
+      rgba(255, 255, 255, 0.055) 46%,
+      rgba(255, 255, 255, 0.11) 50%,
+      rgba(255, 255, 255, 0.045) 54%,
+      transparent 68%
+    );
+    background-size: 260% 100%;
+    background-position: 180% 0;
+    animation: drk-sweep 9s var(--ease-drk) infinite;
+    animation-delay: var(--sweep-delay, 0s);
+    opacity: 0.85;
+  }
+
+  /* --- Hairline separators ----------------------------------------------- */
+  .rule-h {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.12) 18%,
+      rgba(255, 255, 255, 0.12) 82%,
+      transparent
+    );
+  }
+
+  /* --- Eyebrow: small institutional label --------------------------------- */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  /* --- Display type ------------------------------------------------------- */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 0.94;
+    text-wrap: balance;
+  }
+
+  /* --- Horizontal scroller: hidden bar + a fade that signals more content -- */
+  .scroll-x {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+  /* The fade only applies where the rail actually scrolls. */
+  @media (max-width: 1023px) {
+    .scroll-x {
+      mask-image: linear-gradient(
+        90deg,
+        black 0,
+        black calc(100% - 44px),
+        transparent 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        black 0,
+        black calc(100% - 44px),
+        transparent 100%
+      );
+    }
+  }
+
+  /* --- Grid field: faint technical graph paper ---------------------------- */
+  .grid-field {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+}
+
+/* ============================================================================
+   KEYFRAMES  — transform / opacity only, no layout-affecting properties
+   ========================================================================= */
+@keyframes drk-sweep {
+  0% {
+    background-position: 180% 0;
+  }
+  55%,
+  100% {
+    background-position: -80% 0;
+  }
+}
+
+@keyframes drk-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+
+@keyframes drk-drift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes drk-dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes drk-scroll-hint {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes drk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes drk-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes drk-caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ============================================================================
+   REVEAL SYSTEM
+   Elements start displaced + transparent; `data-shown` is set by an
+   IntersectionObserver (lib/useReveal). Transform + opacity only.
+   ========================================================================= */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 22px), 0)
+    scale(var(--reveal-s, 1));
+  transition:
+    opacity 0.95s var(--ease-drk),
+    transform 1.15s var(--ease-drk);
+  transition-delay: var(--reveal-d, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal][data-shown="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* Once the reveal has played, drop the compositor hint */
+[data-reveal][data-settled="true"] {
+  will-change: auto;
+}
+
+/* ============================================================================
+   REDUCED MOTION — everything resolves to its final state, instantly
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .specular::after {
+    display: none;
+  }
+}

@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+.env*
+*.tsbuildinfo
+next-env.d.ts
+
+# local tooling
+_shot.mjs
+_audit.mjs
+AGENTS.md
+CLAUDE.md
+tsconfig.tsbuildinfo
