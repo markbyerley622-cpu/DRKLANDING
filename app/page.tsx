@@ -1,63 +1,76 @@
 import { Nav } from "@/components/drk/Nav";
 import { IntroCurtain } from "@/components/system/IntroCurtain";
-import { Undercurrent } from "@/components/system/Undercurrent";
-import { SystemTelemetry } from "@/components/system/SystemTelemetry";
-import { Seam } from "@/components/system/Seam";
+import { LiquidField } from "@/components/system/LiquidField";
 import { Hero } from "@/components/drk/Hero";
-import { Problem } from "@/components/drk/Problem";
-import { EngineModel } from "@/components/drk/EngineModel";
-import { System } from "@/components/drk/System";
-import { Infrastructure } from "@/components/drk/Infrastructure";
-import { Lifecycle } from "@/components/drk/Lifecycle";
-import { FinalCTA } from "@/components/drk/FinalCTA";
+import { Capabilities } from "@/components/drk/Capabilities";
+import { Approach } from "@/components/drk/Approach";
+import { Contact } from "@/components/drk/Contact";
 
 /**
  * DRK — a front door, not a deck.
  *
- * Seven acts. The job is to say what DRK is, show there is real
- * infrastructure behind it, and make the reader get in touch. The
- * application, the launch record, the economics and the raise are not on
- * this site — they are shared privately, on request.
+ * Four screens. Say what DRK is, show what it handles, and open the door.
+ * The walkthrough, the record, the economics and the raise are not on this
+ * site — they are shared privately, on request.
  *
- *   01 SURFACE         the system is already running
- *   02 PROBLEM         opacity becomes observable
- *   03 ENGINE          one system, different operators
- *   04 SYSTEM          controlled glimpses of the product
- *   05 INFRASTRUCTURE  descend beneath the interface
- *   06 LIFECYCLE       the market moves, the system stays connected
- *   07 CLOSE           everything converges, then the door
+ *   01 HERO          the surface, and the liquid running under it
+ *   02 CAPABILITIES  what the system handles
+ *   03 APPROACH      how it runs
+ *   04 CONTACT       the door
  *
- * `Undercurrent` is the persistent world beneath every act; `Seam` carries
- * the signal across each join so the page reads as one descent.
+ * THE LIQUID IS THE CONTINUITY. The same body of fluid runs the whole way
+ * down and only its depth changes: full strength and right-anchored in the
+ * hero, a faint wash through the middle, mirrored at full strength on the
+ * close. Three fields, not one per act — and the middle one is a single
+ * sticky viewport-height canvas spanning both middle acts, so the flow does
+ * not restart at the section join and the canvas never has to be as tall as
+ * the band it covers.
+ *
+ * Each field parks its rAF loop the moment it leaves the viewport, so at
+ * most one is ever drawing.
  */
 export default function Page() {
   return (
     <>
       <IntroCurtain />
-      <Undercurrent />
-      <SystemTelemetry />
       <Nav />
 
       <main id="main" className="relative z-10">
         <Hero />
-        <Seam from={0.5} to={0.36} label="Assets in" />
 
-        <Problem />
-        <Seam from={0.36} to={0.5} label="Observable" />
+        {/* The middle band — one field, two acts. */}
+        <div className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+          >
+            <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+              <LiquidField
+                level={0.42}
+                turbulence={0.55}
+                zoom={1.4}
+                edge="wash"
+                sink={false}
+              />
+              {/* The type column keeps its ground. Copy in these acts is
+                  ink-muted, and mid-grey chrome under it would cost the
+                  contrast the palette is built on — so the flow is held to
+                  the right of the frame and veiled everywhere the text runs. */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(90deg, var(--color-obsidian) 0%, rgba(8,13,12,0.94) 42%, rgba(8,13,12,0.66) 72%, rgba(8,13,12,0.2) 100%)",
+                }}
+              />
+            </div>
+          </div>
 
-        <EngineModel />
-        <Seam from={0.5} to={0.6} />
+          <Capabilities />
+          <Approach />
+        </div>
 
-        <System />
-        <Seam from={0.6} to={0.42} label="Beneath" />
-
-        <Infrastructure />
-        <Seam from={0.42} to={0.5} />
-
-        <Lifecycle />
-        <Seam from={0.5} to={0.5} />
-
-        <FinalCTA />
+        <Contact />
       </main>
     </>
   );

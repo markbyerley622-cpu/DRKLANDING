@@ -103,9 +103,7 @@
   }
 
   body {
-    /* Transparent so the fixed Undercurrent world shows through. `html`
-       still carries the ground colour, so there is never a white flash. */
-    background-color: transparent;
+    background-color: var(--color-obsidian);
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";

@@ -24,6 +24,12 @@ interface Props {
   size?: Size;
   children: ReactNode;
   arrow?: boolean;
+  /**
+   * The wide pill from the design board: the label sits on the left edge and
+   * the arrow is pushed to the right, with a floor width so a short label
+   * still reads as a door rather than a chip.
+   */
+  spread?: boolean;
   className?: string;
   ariaLabel?: string;
 }
@@ -40,6 +46,7 @@ export function Button({
   size = "md",
   children,
   arrow = true,
+  spread = false,
   className = "",
   ariaLabel,
 }: Props) {
@@ -76,7 +83,8 @@ export function Button({
 
   const body = (
     <span
-      className={`group/btn relative inline-flex select-none items-center justify-center gap-3
+      className={`group/btn relative inline-flex select-none items-center gap-3
+        ${spread ? "min-w-[248px] justify-between" : "justify-center"}
         overflow-hidden font-sans font-medium tracking-[0.005em] text-ink
         transition-[transform,box-shadow] duration-500 ease-[var(--ease-drk)]
         hover:-translate-y-px active:translate-y-0 active:duration-100
@@ -118,6 +126,21 @@ export function Button({
             : "inset 0 1px 0 rgba(255,255,255,0.08)",
         }}
       />
+
+      {/* Layer 2b — the green wash entering from the left, as on the board.
+          It sits under the label, not behind the whole face, so the pill
+          still reads as dark glass rather than a green button. */}
+      {isPrimary && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-90
+            transition-opacity duration-500 group-hover/btn:opacity-100"
+          style={{
+            background:
+              "linear-gradient(96deg, rgba(0,255,122,0.20) 0%, rgba(0,255,122,0.075) 34%, transparent 68%)",
+          }}
+        />
+      )}
 
       {/* Layer 3 — green floor bloom, primary only */}
       {isPrimary && (

@@ -26,14 +26,14 @@ const plex = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DRK — Programmatic Trading & Liquidity Infrastructure",
+  title: "DRK — Get Liquid",
   description:
-    "DRK turns token launches into visible trading programs. One runtime for wallets, liquidity, execution and reporting.",
+    "DRK brings institutional-grade liquidity management built for performance, execution, and scale.",
   metadataBase: new URL("https://drk.io"),
   openGraph: {
-    title: "DRK — Programmatic Trading & Liquidity Infrastructure",
+    title: "DRK — Get Liquid",
     description:
-      "One runtime for wallets, liquidity, execution and reporting. DRK is an operating layer.",
+      "Institutional-grade liquidity management built for performance, execution, and scale.",
     type: "website",
   },
   robots: { index: true, follow: true },

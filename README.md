@@ -1,12 +1,13 @@
 # DRK — Landing
 
-Programmatic trading & liquidity infrastructure for market operations.
+Institutional-grade liquidity management. One page, four screens, one door.
 
 ## Stack
 
 - **Next.js 16** (App Router, Turbopack) · **React 19** · **TypeScript**
 - **Tailwind CSS 4** with a DRK token layer in `app/globals.css`
-- **No animation dependencies** — not even GSAP. See "Motion architecture".
+- **No animation dependencies.** The one piece of heavy motion is a ~120-line
+  raw-WebGL fragment shader; everything else is CSS.
 
 ## Run
 
@@ -24,67 +25,115 @@ Zero configuration. Import the repo and deploy — the app is fully static
 variables, or external services. Fonts are self-hosted at build time via
 `next/font`, so there are no runtime third-party requests.
 
-## The world
+## The page
 
-The page is one continuous descent, not a stack of sections. Two components
-carry that:
+```
+01 HERO          the surface, and the liquid running under it
+02 CAPABILITIES  what the system handles
+03 APPROACH      how it runs
+04 CONTACT       the door
+```
 
-- **`Undercurrent`** — a single fixed canvas behind the entire document. The
-  same routes and signals run the whole way down, and how much of them you can
-  see is driven by document progress: barely visible at the surface, fully
-  revealed inside the runtime, retreating again at the end. This is
-  "liquidity beneath the surface" made literal. `body` is transparent so it
-  shows through; `html` keeps the ground colour.
-- **`Seam`** — the join between two acts. A path leaves the act above, carries
-  a packet across the gap, and arrives at the act below, so no act simply
-  stops and the next one starts.
+The site is a **front door, not a deck**. Its job is to say what DRK is, show
+there is real infrastructure behind it, and make the reader get in touch.
+Deliberately **not** on this site — shared privately on request instead:
 
-Both are built from the same four primitives every act uses — the PATH, the
-SIGNAL, the NODE and the SURFACE — so the page reads as one designed world.
+- the application walkthrough / demo reel
+- launch results and any P/L
+- economics, revenue and projections
+- the raise
+- market statistics
+
+`public/intro.mp4` is the only video: a title card containing the wordmark and
+nothing else, played by `components/system/IntroCurtain.tsx`. It leaves on clip
+end, on any click/tap/keypress, or on a hard 3.2s ceiling if the file never
+plays; `prefers-reduced-motion` never sees it.
+
+## The liquid
+
+`public/effect.jpg` is the design board's chrome-and-signal-green plate.
+`components/system/LiquidField.tsx` uploads it as a WebGL texture and warps
+its **sample coordinates** with a scrolling fbm field, so the ridges bend and
+settle instead of sitting still. Because only the lookup moves, the chrome
+never smears. Riding on that warp:
+
+| Layer | What it does |
+| --- | --- |
+| FLOW | domain-warped UVs drifting along the ridge angle |
+| SIGNAL | green sampled at a larger warp than silver, so it slides over the metal |
+| SPECULAR | one highlight travelling the diagonal on the ridge angle |
+
+The pointer bends the field toward the cursor; `--p` sinks and dims it as its
+act leaves.
+
+**Three framing rules the shader has to respect**, each of which was a bug
+before it was a rule:
+
+1. **Cover-fit scales the visible slice, it does not divide it.** A tall frame
+   sees a narrow column of a landscape plate. Getting this backwards reads as
+   correct on a wide desktop (where the fit factor is ~1) and falls apart on
+   a phone.
+2. **Warp and channel offsets are measured on screen, then converted into
+   texture space** via the crop magnification. A fixed texture-space offset
+   is magnified by the crop on tall frames, which shears the flow and fringes
+   the chrome magenta.
+3. **The green offset is gated by how green the pixel already is.** A flat
+   offset drags green off the white speculars and tints them.
+
+**`turbulence`, `zoom` and `focus` are uniforms and must never be effect
+dependencies.** `useIsCompact` resolves to its real value one frame after
+mount, so on a phone all three change immediately; rebuilding the context for
+that calls `loseContext()`, and *a canvas that has had its context
+deliberately lost can never acquire another one*. The field would silently
+fall back to the static plate on exactly the viewports that flip. The context
+is built once; uniforms are pushed to it.
+
+**The shader sources are template literals — no backticks inside them.** A
+stray one terminates the string and produces a parse error pointing at the
+wrong thing.
+
+Cost control: DPR capped at 1.75, rAF parked when the canvas leaves the
+viewport or the tab is hidden, one static frame under `prefers-reduced-motion`,
+and a CSS-image fallback if WebGL is missing. Three fields exist (hero, middle
+band, close) but at most one is ever drawing.
+
+The middle band's field is a **single sticky viewport-height canvas spanning
+both middle acts**, so the flow does not restart at the section join and the
+canvas never has to be as tall as the band it covers.
 
 ## Motion architecture
 
-The page is a scroll-synchronised sequence, not a stack of sections. One
-engine (`lib/scroll.ts`) owns **a single scroll listener and a single rAF
+One engine (`lib/scroll.ts`) owns **a single scroll listener and a single rAF
 loop**, does one read pass over every stage, then one write pass.
 
 **Progress is published as a CSS variable, not React state.** Each stage
 writes `--p` (0 → 1) onto its own DOM node; `--p` inherits, so descendants
 interpolate in pure CSS. React re-renders only when a *discrete* step index
-changes. Measured cost: **median 16.6 ms / p95 17.7 ms** per scroll frame —
-inside the 60fps budget.
-
-**Pinning is `position: sticky`, not a library.** A `PinnedStage` is a tall
-spacer wrapping a sticky viewport-height frame, so the browser owns the pin.
-No injected pin-spacing, no transform-based faux-pinning fighting native
-scroll, no scroll-jacking possible, and cleanup is just React unmounting.
-Resize is handled by the browser for free.
+changes.
 
 Helper classes in `globals.css` (`.band`, `.band-rise`, `.band-hold`,
 `.band-step`, `.band-draw`) map a slice of `--p` onto a child's local
 progress, so a stage's choreography is declared where the markup lives.
-
-Pin length is set per-stage and **shortened on compact viewports** via
-`--len-d` / `--len-m`, giving mobile a deliberately tighter sequence with no
-JS branch.
-
-`SystemTelemetry` reads any element declaring `data-phase`, so the persistent
-`SYSTEM / …` readout can never drift out of sync with the page structure.
 
 ## Structure
 
 ```
 app/
   layout.tsx        fonts, metadata, skip link
-  page.tsx          the 14-act narrative composition
+  page.tsx          the four-act composition + the middle-band field
   globals.css       DRK design tokens + material utilities
+  icon.svg          favicon
 content/
-  drk.ts            SINGLE SOURCE OF TRUTH for all copy and data
+  drk.ts            SINGLE SOURCE OF TRUTH for all copy
 lib/
-  motion.ts         reveal / scroll-progress / parallax / sequence hooks
+  scroll.ts         stage progress / reveal / pointer / compact hooks
 components/
   ui/               Button, Panel, Chip, Section primitives
-  drk/              one component per narrative act
+  system/           LiquidField, IntroCurtain
+  drk/              one component per act
+public/
+  effect.jpg        the design board's plate — the shader's texture
+  intro.mp4         the title card
 ```
 
 ## Design system
@@ -111,35 +160,20 @@ Text contrast on the ground colour:
 | `ink-faint` | 5.1:1 | labels, captions, **all disclaimers** |
 | `ink-ghost` | 3.4:1 | decorative marks and pre-activation states only |
 
-## Scope: this is a front door, not a deck
-
-The site's job is to say what DRK is, show there is real infrastructure
-behind it, and make the reader get in touch. Deliberately **not** on this
-site — shared privately on request instead:
-
-- the application walkthrough / demo reel
-- launch results and any P/L
-- economics, revenue and projections
-- the raise
-- market statistics
-
-`public/intro.mp4` is the only video: a title card containing the wordmark
-and nothing else, played by `components/system/IntroCurtain.tsx`. It leaves
-on clip end, on any click/tap/keypress, or on a hard 3.2s ceiling if the file
-never plays; `prefers-reduced-motion` never sees it.
+Body copy is `ink-muted`, and mid-grey chrome underneath it would cost that
+ratio — so every act that runs copy over the field also veils the field
+everywhere the text runs. The flow is held to the side of the frame the type
+does not occupy.
 
 ## Content rules
 
-`content/drk.ts` is the only place copy or data lives. Two rules hold:
+`content/drk.ts` is the only place copy lives. Four rules hold:
 
-1. **Nothing is invented.** Where the source material referenced figures that
-   were never supplied, the entry carries `pending: true` and the UI renders a
-   qualitative treatment instead of a fabricated number.
-2. **Search `pending: true`** to find everything awaiting founder approval
-   before it can be published.
-3. **Plain language.** "Runtime", "operating layer" and "telemetry" are
-   insider words that wash out for the people this page is for. Say what the
-   thing does: wallets, liquidity, trading, reporting.
+1. **Say it in a line or cut it.** The page sells a conversation, not the
+   product. Anything that reads like a paragraph belongs in that conversation.
+2. **Nothing sensitive.** No client data, no P/L, no revenue, no projections,
+   no market statistics, no performance claims.
+3. **No "market making".** The phrase appears nowhere on the public site.
 4. **Contact details are never guessed.** The two Telegram handles in
    `contact` are the real ones, taken verbatim from DRK's pitch deck build.
    There is deliberately no email address: a plausible-looking address that
@@ -149,14 +183,9 @@ never plays; `prefers-reduced-motion` never sees it.
 
 - Verified zero horizontal overflow at 320 → 1920 px.
 - `prefers-reduced-motion` resolves every element to its final state; the
-  Canvas field renders one static frame and stops its rAF loop.
+  field renders one static frame and never starts its rAF loop.
 - Full keyboard traversal with a visible focus ring and a skip link.
 - Decorative surfaces are `aria-hidden` and stay out of the tab order.
-
-## Performance
-
-- Canvas rAF is paused whenever the field leaves the viewport.
-- Route and pulse counts are reduced on compact viewports.
-- One shared `IntersectionObserver` drives every reveal; `will-change` is
-  dropped once each transition settles.
-- Motion is transform/opacity only — no layout-affecting animation.
+- The compact hero is not the wide hero shrunk: there is no room for a side
+  column, so the type takes the top of the frame on black and the liquid takes
+  the bottom, and the board's forced line break in the body copy reflows.
