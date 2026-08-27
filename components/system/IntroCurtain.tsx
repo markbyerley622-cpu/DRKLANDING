@@ -13,17 +13,54 @@ import { curtain } from "@/content/drk";
  * first painted frame is already the card. A curtain that appears a moment
  * after the page has is not a curtain, it is an interruption.
  *
- * And it never traps anybody:
- *   - it leaves by itself when the clip ends
+ * IT IS DELIBERATELY BRIEF — about 1.1s, start to gone. The clip runs 2s, but
+ * a title card is not a video the reader came to watch; it is a beat before
+ * the page. So the curtain leaves mid-clip, while the mark is on screen and
+ * before anyone has begun waiting for it. Landing on the site should feel
+ * like the page fading up, not like sitting through an intro.
+ *
+ * THE BEAT IS OWNED BY CSS (`.drk-curtain` in globals.css), not by a timer
+ * here. A JS timer starts at hydration, and on a cold load hydration is the
+ * slow part — the same card that left after ~1.1s warm sat for over three
+ * seconds cold. The animation is in the server HTML, so it starts at first
+ * paint and the beat is identical on any connection. This component only
+ * unmounts the card afterwards and handles early dismissal.
+ *
+ * The exit is opacity alone. Scale and blur on the way out read as an effect;
+ * a straight crossfade into the hero reads as the same black simply becoming
+ * the page — and the hero's own liquid is already surfacing underneath, so
+ * there is something to arrive at rather than a cut.
+ *
+ * It never traps anybody:
+ *   - it leaves by itself on the CSS beat, or when the clip ends
  *   - a click, a tap or any key dismisses it immediately
- *   - a hard 3.2s ceiling dismisses it even if the file never plays at all
- *     (blocked autoplay policy, decode failure, cold network)
+ *   - the animation's end state is `pointer-events: none`, so a curtain whose
+ *     JS never arrives still cannot cover the page
  *   - `prefers-reduced-motion` never sees it
  *
- * The page behind it stays scrollable and stays readable to assistive tech —
- * the curtain is `aria-hidden`, so a screen reader is already in the hero
- * while the card plays.
+ * The page behind it stays readable to assistive tech — the curtain is
+ * `aria-hidden`, so a screen reader is already in the hero while it plays.
  */
+
+/** The CSS beat, mirrored here so unmount can track it. Keep in sync with
+ *  `.drk-curtain` in globals.css: 700ms delay + 400ms fade. */
+const BEAT_MS = 1100;
+/** Early dismissal (click / key / clip end) crossfades faster than the beat. */
+const DISMISS_MS = 260;
+
+/**
+ * How far into the CSS beat we are. The beat is measured from first paint,
+ * because that is when the animation in the server HTML actually started —
+ * mount time would be the wrong origin, and by exactly the amount that
+ * hydration was slow.
+ */
+function beatElapsed() {
+  const paint = performance
+    .getEntriesByType("paint")
+    .find((e) => e.name === "first-contentful-paint");
+  return paint ? performance.now() - paint.startTime : 0;
+}
+
 export function IntroCurtain() {
   const [mounted, setMounted] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -37,18 +74,11 @@ export function IntroCurtain() {
   /* Reduced motion: no card at all. */
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setLeaving(true);
       setGone(true);
     }
   }, []);
 
-  /* The ceiling. Whatever happens to the file, the page is never held hostage. */
-  useEffect(() => {
-    const t = window.setTimeout(dismiss, 3200);
-    return () => window.clearTimeout(t);
-  }, [dismiss]);
-
-  /* Any key gets past it — a keyboard user never has to find the control. */
+  /* Any key gets past it — a keyboard user never has to find a control. */
   useEffect(() => {
     if (leaving) return;
     const onKey = () => dismiss();
@@ -56,9 +86,17 @@ export function IntroCurtain() {
     return () => window.removeEventListener("keydown", onKey);
   }, [leaving, dismiss]);
 
-  /* Hold the page still underneath, so the card is not scrolled behind. */
+  /**
+   * Hold the page still underneath, so the card is not scrolled behind.
+   *
+   * Guarded on the beat: this effect runs at hydration, and if hydration lost
+   * a race with a slow connection the curtain has already faded by the time
+   * we get here. Locking scroll *after* the card is visually gone is a hiccup
+   * the reader feels and cannot explain, which is worse than not locking at
+   * all — and there is nothing left to protect by then anyway.
+   */
   useEffect(() => {
-    if (gone) return;
+    if (gone || beatElapsed() >= BEAT_MS) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -66,15 +104,35 @@ export function IntroCurtain() {
     };
   }, [gone]);
 
-  /* Unmount only after the fade, so the last frame is not a jump cut. */
+  /* Early dismissal unmounts after its own shorter fade. */
   useEffect(() => {
     if (!leaving) return;
-    const t = window.setTimeout(() => setGone(true), 520);
+    const t = window.setTimeout(() => setGone(true), DISMISS_MS);
     return () => window.clearTimeout(t);
   }, [leaving]);
 
-  /* Autoplay refusal is an expected outcome, not an error — the ceiling covers
-     it, and the clip's own ground is this exact black anyway. */
+  /**
+   * Unmount on the SAME clock the CSS beat runs on — measured from first
+   * paint, not from here.
+   *
+   * `animationend` alone is not enough: React attaches that listener during
+   * hydration, and on a cold load hydration lands after the animation has
+   * already finished, so the event is simply missed and the card sits in the
+   * tree. That is not merely untidy — the scroll lock below is released on
+   * unmount, so the reader was left unable to scroll for seconds after the
+   * curtain had visually gone.
+   *
+   * Reading first paint and subtracting tells us how much of the beat is
+   * left. Hydrate late enough and the answer is zero, which is correct.
+   */
+  useEffect(() => {
+    const remaining = Math.max(0, BEAT_MS - beatElapsed());
+    const t = window.setTimeout(() => setGone(true), remaining);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  /* Autoplay refusal is an expected outcome, not an error — the CSS beat runs
+     regardless, and the clip's own ground is this exact black anyway. */
   useEffect(() => {
     if (!mounted) return;
     void videoRef.current?.play().catch(() => {});
@@ -87,86 +145,42 @@ export function IntroCurtain() {
       aria-hidden
       data-drk-curtain=""
       onClick={dismiss}
-      className="fixed inset-0 z-[200] grid place-items-center bg-obsidian transition-opacity duration-[520ms] ease-[var(--ease-drk)]"
-      style={{
-        opacity: leaving ? 0 : 1,
-        pointerEvents: leaving ? "none" : "auto",
+      /* Animation events BUBBLE: the video's own 340ms fade-in would other-
+         wise unmount the curtain a third of a second in. Only this element's
+         own exit counts. */
+      onAnimationEnd={(e) => {
+        if (e.target === e.currentTarget && e.animationName === "drk-curtain-out") {
+          setGone(true);
+        }
       }}
+      className="drk-curtain fixed inset-0 z-[200] grid place-items-center bg-obsidian"
+      style={
+        leaving
+          ? {
+              // Take the beat off it and run the shorter fade from wherever
+              // the animation had got to.
+              animation: "none",
+              opacity: 0,
+              pointerEvents: "none",
+              transition: `opacity ${DISMISS_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+            }
+          : undefined
+      }
     >
-      {/* The mark animates IN with the card and OUT as it leaves: it scales
-          up fractionally and dissolves, so the curtain hands the wordmark to
-          the nav rather than cutting to it. */}
-      <div
-        className="absolute inset-0 grid place-items-center transition-all duration-[520ms] ease-[var(--ease-drk)]"
-        style={{
-          opacity: leaving ? 0 : 1,
-          transform: leaving ? "scale(1.06)" : "scale(1)",
-          filter: leaving ? "blur(6px)" : "blur(0px)",
-        }}
-      >
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption -- silent brand
-            title card; the wordmark is duplicated as text in the nav beneath. */}
-        <video
-          ref={videoRef}
-          src={curtain.src}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          onEnded={dismiss}
-          /* `contain`, not `cover`: the card is 16:9 and a phone is not, and
-             the clip's own ground is this black, so it letterboxes invisibly. */
-          className="drk-curtain-mark h-full w-full object-contain"
-        />
-      </div>
-
-      {/* ---- Boot readout -------------------------------------------------
-          Brand language, not telemetry. Driven by CSS rather than a React
-          timer: on a cold connection the video is the slow part, and a
-          progress bar that stalls is worse than none. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[19%] flex flex-col items-center gap-3.5 px-6 sm:bottom-[22%]">
-        <span
-          aria-hidden
-          className="block h-px w-[min(13rem,42vw)] overflow-hidden"
-          style={{ background: "rgba(255,255,255,0.1)" }}
-        >
-          <span
-            className="drk-boot-fill block h-full w-full origin-left bg-hero"
-            style={{
-              boxShadow: "0 0 10px 0 rgba(0,255,122,0.7)",
-              animationPlayState: leaving ? "paused" : "running",
-            }}
-          />
-        </span>
-
-        {/* One line at a time, in place — a stack of four would read as a log. */}
-        <span className="relative block h-3 w-full text-center">
-          {curtain.boot.map((line, i) => (
-            <span
-              key={line}
-              className="drk-boot-line absolute inset-x-0 font-mono text-[9px] uppercase tracking-[0.28em] text-ink-faint"
-              style={{ animationDelay: `${i * 0.52}s` }}
-            >
-              {line}
-            </span>
-          ))}
-        </span>
-      </div>
-
-      <button
-        type="button"
-        /* Focusable elements must not live inside an aria-hidden subtree, and
-           a keyboard user has the whole keyboard instead. */
-        tabIndex={-1}
-        onClick={dismiss}
-        className="absolute bottom-[clamp(1.25rem,4vh,2.5rem)] right-[clamp(1.25rem,4vw,2.5rem)]
-          inline-flex min-h-[34px] items-center rounded-full border px-4 font-mono text-[9.5px]
-          uppercase tracking-[0.2em] text-ink-faint transition-colors duration-300
-          hover:border-hero/40 hover:text-ink"
-        style={{ borderColor: "rgba(255,255,255,0.13)" }}
-      >
-        {curtain.skip}
-      </button>
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- silent brand
+          title card; the wordmark is duplicated as text in the nav beneath. */}
+      <video
+        ref={videoRef}
+        src={curtain.src}
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        onEnded={dismiss}
+        /* `contain`, not `cover`: the card is 16:9 and a phone is not, and
+           the clip's own ground is this black, so it letterboxes invisibly. */
+        className="drk-curtain-mark h-full w-full object-contain"
+      />
     </div>
   );
 }

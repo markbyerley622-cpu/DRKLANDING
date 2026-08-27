@@ -269,6 +269,20 @@ export function LiquidField({
   const [fx, fy] = focus;
 
   /**
+   * The GL context is not built until the field is first near the viewport.
+   *
+   * Compiling and linking a shader is synchronous main-thread work, and every
+   * field doing it during hydration delays hydration itself — which delays
+   * everything hydration owns, the opening card's unmount included.
+   *
+   * In practice this defers the closing field only: the middle band begins
+   * immediately below the fold, so it is already inside the margin at rest.
+   * That is the right trade — the band is the next thing the reader scrolls
+   * into, and a wash that has to compile as it enters would hitch.
+   */
+  const [active, setActive] = useState(false);
+
+  /**
    * Turbulence, zoom and focus are UNIFORMS — they must never be effect
    * dependencies. `useIsCompact` resolves to its real value only after mount,
    * so a compact hero changes all three one frame in; rebuilding the context
@@ -289,7 +303,25 @@ export function LiquidField({
   const scrollElRef = useRef(scrollRef);
   scrollElRef.current = scrollRef;
 
+  /* Cheap watcher: no GL, no allocation — just "has this been near yet". */
   useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setActive(true);
+        io.disconnect();
+      },
+      // Build a little before arrival so the first frame is never a blank.
+      { rootMargin: "300px" },
+    );
+    io.observe(host);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!active) return;
     const canvas = canvasRef.current;
     const host = hostRef.current;
     if (!canvas || !host) return;
@@ -525,7 +557,7 @@ export function LiquidField({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [active]);
 
   /* Push uniform changes to the live context instead of rebuilding it. */
   useEffect(() => {

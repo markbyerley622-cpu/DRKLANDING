@@ -45,9 +45,33 @@ Deliberately **not** on this site — shared privately on request instead:
 - market statistics
 
 `public/intro.mp4` is the only video: a title card containing the wordmark and
-nothing else, played by `components/system/IntroCurtain.tsx`. It leaves on clip
-end, on any click/tap/keypress, or on a hard 3.2s ceiling if the file never
-plays; `prefers-reduced-motion` never sees it.
+nothing else, played by `components/system/IntroCurtain.tsx`. The clip runs 2s
+but the card leaves after about **1.1s**, mid-clip — a title card is a beat
+before the page, not a video the reader came to watch. The exit is opacity
+alone; scale and blur read as an effect, where a straight crossfade reads as
+the same black simply becoming the page.
+
+**The beat is owned by CSS (`.drk-curtain`), not by a JS timer.** The card is
+in the server HTML, so the animation starts at first paint. A timer starts at
+hydration instead, and on a cold load hydration is the slow part — the same
+card that left after ~1.1s warm sat for over three seconds cold. Two
+consequences fall out of that and are handled explicitly:
+
+- The animation's end state includes `pointer-events: none`, so a curtain
+  whose JS never arrives still cannot cover the page.
+- Unmount and the scroll lock are both measured from **first paint**, not from
+  mount. `animationend` alone is not enough: React attaches that listener at
+  hydration, so on a cold load the event has already fired and is missed — and
+  since the scroll lock releases on unmount, the reader was left unable to
+  scroll for seconds after the card had visually gone. If the beat has already
+  elapsed by the time JS runs, the lock is never applied at all.
+- Animation events **bubble** — the video's own fade-in would otherwise
+  unmount the curtain a third of a second in, so the handler checks
+  `animationName`.
+
+It also leaves on clip end, on any click/tap/keypress; `prefers-reduced-motion`
+never sees it (`display: none`, because the global reduced-motion rule zeroes
+animation *duration* but not *delay*).
 
 ## The liquid
 
@@ -111,6 +135,14 @@ Cost control: DPR capped at 1.75, rAF parked when the canvas leaves the
 viewport or the tab is hidden, one static frame under `prefers-reduced-motion`,
 and a CSS-image fallback if WebGL is missing. Three fields exist (hero, middle
 band, close) but at most one is ever drawing.
+
+**A field does not build its GL context until it is first near the viewport.**
+Compiling and linking a shader is synchronous main-thread work, and every field
+doing it during hydration delays hydration itself — which delays everything
+hydration owns, the opening card's unmount included. In practice this defers
+the closing field; the middle band begins immediately below the fold and so is
+already inside the margin at rest, which is the right trade, as a wash that had
+to compile as it scrolled in would hitch.
 
 The middle band's field is a **single sticky viewport-height canvas spanning
 both middle acts** (`components/system/FlowBand.tsx`), so the flow does not

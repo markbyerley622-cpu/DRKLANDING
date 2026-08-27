@@ -53,11 +53,13 @@ export const contact = {
 
 /**
  * DRK's own title card — the wordmark and nothing else.
+ *
+ * There is no boot readout and no skip control. Both were there to make a
+ * three-second wait bearable; the card now leaves in about one, and a
+ * progress bar over a beat that short only draws attention to itself.
  */
 export const curtain = {
   src: "/intro.mp4",
-  skip: "Skip",
-  boot: ["Initializing", "Connecting", "Syncing", "Ready"],
 } as const;
 
 export const nav = [
