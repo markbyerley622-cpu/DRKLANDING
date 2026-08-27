@@ -4,6 +4,7 @@ import { LiquidField } from "@/components/system/LiquidField";
 import { Logo } from "@/components/drk/Logo";
 import { Button } from "@/components/ui/Button";
 import { Reveal, Eyebrow } from "@/components/ui/Primitives";
+import { useIsCompact } from "@/lib/scroll";
 import { contact, brand } from "@/content/drk";
 
 /**
@@ -17,7 +18,13 @@ import { contact, brand } from "@/content/drk";
  * The handles are rendered exactly as supplied. They are never completed or
  * guessed: a wrong handle sends someone to a stranger.
  */
+/* Stable identity: changing the field's framing must not churn its context. */
+const WIDE_FOCUS: [number, number] = [0.54, 0.5];
+const COMPACT_FOCUS: [number, number] = [0.6, 0.64];
+
 export function Contact() {
+  const compact = useIsCompact();
+
   return (
     <section
       id="contact"
@@ -25,15 +32,27 @@ export function Contact() {
     >
       {/* The field, flipped — the close mirrors the open. */}
       <div className="pointer-events-none absolute inset-0" style={{ transform: "scaleX(-1)" }}>
-        <LiquidField level={0.85} turbulence={0.8} zoom={1.12} edge="hero" sink={false} />
+        <LiquidField
+          level={0.85}
+          turbulence={0.8}
+          zoom={compact ? 1.22 : 1.12}
+          /* Compact has no room for a side column, so — exactly as in the
+             hero — the type takes the top of the frame on black and the
+             liquid takes the bottom. Mirrored, this act's liquid still
+             arrives from the opposite side to the hero's. */
+          edge={compact ? "surface" : "hero"}
+          focus={compact ? COMPACT_FOCUS : WIDE_FOCUS}
+          sink={false}
+        />
       </div>
 
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "linear-gradient(268deg, var(--color-obsidian) 0%, rgba(8,13,12,0.84) 28%, rgba(8,13,12,0.28) 48%, transparent 64%)",
+          background: compact
+            ? "linear-gradient(174deg, var(--color-obsidian) 0%, rgba(8,13,12,0.94) 38%, rgba(8,13,12,0.55) 58%, transparent 76%)"
+            : "linear-gradient(268deg, var(--color-obsidian) 0%, rgba(8,13,12,0.84) 28%, rgba(8,13,12,0.28) 48%, transparent 64%)",
         }}
       />
       <div

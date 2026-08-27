@@ -66,6 +66,16 @@ never smears. Riding on that warp:
 The pointer bends the field toward the cursor; `--p` sinks and dims it as its
 act leaves.
 
+**The middle band's field is scroll-driven.** `FlowBand` hands `LiquidField`
+the band element, and the field reads that element's traversal *inside its own
+rAF loop* — one rect read a frame, in a loop that is already running and is
+parked whenever the field is off screen, which is exactly when the value does
+not matter. Scroll advances the fbm flow along the same axis time does, so the
+two are one motion rather than two competing ones: let go of the wheel and the
+flow keeps its heading, just slower. The value is smoothed, so a flung scroll
+arrives as a surge, and it lives in a ref — a re-render per frame would defeat
+the whole engine.
+
 **Three framing rules the shader has to respect**, each of which was a bug
 before it was a rule:
 
@@ -77,8 +87,13 @@ before it was a rule:
    texture space** via the crop magnification. A fixed texture-space offset
    is magnified by the crop on tall frames, which shears the flow and fringes
    the chrome magenta.
-3. **The green offset is gated by how green the pixel already is.** A flat
-   offset drags green off the white speculars and tints them.
+3. **The green offset is gated by how green the pixel already is**, and the
+   two samples are combined with `max()`, not a crossfade. A flat offset drags
+   green off the white speculars and tints them; a crossfade lets green fall
+   *below* the plate wherever the offset lands on a dark spot, and dropping
+   green while red and blue hold leaves magenta on the ridges. `max()` can
+   only add signal, so magenta is not a reachable colour. This matters most
+   under scroll, where travel pushes the offset furthest.
 
 **`turbulence`, `zoom` and `focus` are uniforms and must never be effect
 dependencies.** `useIsCompact` resolves to its real value one frame after
@@ -98,8 +113,9 @@ and a CSS-image fallback if WebGL is missing. Three fields exist (hero, middle
 band, close) but at most one is ever drawing.
 
 The middle band's field is a **single sticky viewport-height canvas spanning
-both middle acts**, so the flow does not restart at the section join and the
-canvas never has to be as tall as the band it covers.
+both middle acts** (`components/system/FlowBand.tsx`), so the flow does not
+restart at the section join and the canvas never has to be as tall as the band
+it covers.
 
 ## Motion architecture
 
@@ -129,7 +145,7 @@ lib/
   scroll.ts         stage progress / reveal / pointer / compact hooks
 components/
   ui/               Button, Panel, Chip, Section primitives
-  system/           LiquidField, IntroCurtain
+  system/           LiquidField, FlowBand, IntroCurtain
   drk/              one component per act
 public/
   effect.jpg        the design board's plate — the shader's texture
@@ -186,6 +202,9 @@ does not occupy.
   field renders one static frame and never starts its rAF loop.
 - Full keyboard traversal with a visible focus ring and a skip link.
 - Decorative surfaces are `aria-hidden` and stay out of the tab order.
-- The compact hero is not the wide hero shrunk: there is no room for a side
-  column, so the type takes the top of the frame on black and the liquid takes
-  the bottom, and the board's forced line break in the body copy reflows.
+- The compact hero and close are not the wide ones shrunk: there is no room
+  for a side column, so the type takes the top of the frame on black and the
+  liquid takes the bottom, and the board's forced line break in the hero body
+  copy reflows.
+- Verified at 320 / 390 / 768 / 1440 / 1920: zero horizontal overflow at the
+  top and the bottom of the page, all three fields live, no console errors.

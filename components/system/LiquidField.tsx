@@ -54,6 +54,13 @@ interface Props {
   edge?: "hero" | "surface" | "wash";
   /** Sink + dim as the owning stage exits (reads `--p`). */
   sink?: boolean;
+  /**
+   * Element whose traversal of the viewport drives the flow. Given one, the
+   * field advances with the reader's scroll instead of on time alone.
+   */
+  scrollRef?: React.RefObject<HTMLElement | null>;
+  /** How far a full traversal carries the liquid. 0 = time only. */
+  travel?: number;
   className?: string;
 }
 
@@ -78,6 +85,8 @@ uniform float u_turb;     // turbulence
 uniform float u_zoom;
 uniform vec2  u_pointer;  // -1..1
 uniform vec2  u_focus;    // sample centre in texture space
+uniform float u_scroll;   // 0..1 traversal of the band that owns this field
+uniform float u_travel;   // how far a full traversal carries the liquid
 
 /* --- value noise + fbm ---------------------------------------------------- */
 vec2 hash2(vec2 p) {
@@ -133,13 +142,21 @@ void main() {
 
   float t = u_time;
 
+  /* Scroll advances the liquid along the SAME axis time does, so the two are
+     one motion rather than two competing ones: let go of the wheel and the
+     flow keeps its heading, just slower. Reading is the current position,
+     not a separate animation triggered at a threshold. */
+  float travel = u_scroll * u_travel;
+
   /* --- FLOW: domain warp -------------------------------------------------- */
   vec2 q = uv * vec2(u_res.x / u_res.y, 1.0);
 
   // Two counter-travelling fbm fields. Their interference is the motion:
   // crests brighten where they agree and part again where they don't.
-  float n1 = fbm(q * 2.6 + FLOW * t * 0.09);
-  float n2 = fbm(q * 1.7 - FLOW * t * 0.055 + vec2(4.7, 2.1));
+  // Scroll pushes both, so the ridges genuinely re-form as you descend
+  // instead of the whole plate sliding past like a parallax layer.
+  float n1 = fbm(q * 2.6 + FLOW * (t * 0.09 + travel * 1.15));
+  float n2 = fbm(q * 1.7 - FLOW * (t * 0.055 + travel * 0.72) + vec2(4.7, 2.1));
 
   vec2 warp = vec2(n1, n2) * 2.0 - 1.0;
 
@@ -163,7 +180,8 @@ void main() {
   float amp = u_turb * 0.032 * edgeHold * mag;
 
   // A slow bodily drift on top of the warp, so the whole plate breathes.
-  vec2 drift = FLOW * (sin(t * 0.07) * 0.012 + 0.006 * sin(t * 0.031 + 1.7)) * mag;
+  vec2 drift = FLOW * (sin(t * 0.07) * 0.012 + 0.006 * sin(t * 0.031 + 1.7)
+                       + travel * 0.16) * mag;
 
   /* The warp is applied in TEXTURE space, not screen space. Cover-fit
      compresses the two axes by different amounts — on a tall frame the
@@ -181,13 +199,20 @@ void main() {
   col.r = plate.r;
   col.b = plate.b;
 
-  // Green is sampled twice and crossfaded BY HOW GREEN THE PIXEL ALREADY IS.
-  // A flat offset would drag green off the white speculars too and tint them
-  // magenta; gating it means only the signal slides, and the chrome stays
-  // neutral no matter how hard the field warps.
+  // Green is sampled twice and combined BY HOW GREEN THE PIXEL ALREADY IS,
+  // so only the signal slides and the chrome stays neutral however hard the
+  // field warps.
+  //
+  // The combine is max(), not a crossfade. Crossfading lets green fall BELOW
+  // the plate wherever the offset sample lands on a dark spot — and on a
+  // green ridge, dropping the green channel while red and blue hold leaves
+  // magenta. Taking the brighter of the two can only ever add signal, so the
+  // shimmer reads as the crest blooming along itself and magenta is not a
+  // reachable colour. This matters most under scroll, where travel pushes the
+  // offset furthest.
   float gOffset = texture2D(u_tex, base + warp * amp * 0.14 + drift * 0.2 * mag).g;
   float greenness = clamp((plate.g - max(plate.r, plate.b)) * 7.0, 0.0, 1.0);
-  col.g = mix(plate.g, gOffset, greenness);
+  col.g = mix(plate.g, max(plate.g, gOffset), greenness);
 
   /* --- The green breathing through the metal ------------------------------ */
   // Isolate the signal: green in excess of the silver it sits on.
@@ -197,7 +222,10 @@ void main() {
 
   /* --- SPECULAR: one highlight on the ridge angle ------------------------- */
   float axis = dot(uv - 0.5, normalize(FLOW));
-  float band = exp(-pow((axis - (fract(t * 0.035) * 2.4 - 1.2)) * 5.5, 2.0));
+  // The highlight is driven mostly by scroll: it crosses the frame once over
+  // the band, so descending reads as light travelling down the liquid.
+  float sweep = fract(t * 0.035 + travel * 0.62) * 2.4 - 1.2;
+  float band = exp(-pow((axis - sweep) * 5.5, 2.0));
   // Only the chrome takes the highlight; flat black stays black.
   float metal = smoothstep(0.06, 0.42, max(col.r, max(col.g, col.b)));
   col += vec3(0.30, 0.36, 0.33) * band * metal * 0.5;
@@ -231,6 +259,8 @@ export function LiquidField({
   focus = [0.54, 0.5],
   edge = "hero",
   sink = true,
+  scrollRef,
+  travel = 0,
   className = "",
 }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -252,8 +282,12 @@ export function LiquidField({
     u: Record<string, WebGLUniformLocation | null>;
     redraw: () => void;
   } | null>(null);
-  const propsRef = useRef({ turbulence, zoom, fx, fy });
-  propsRef.current = { turbulence, zoom, fx, fy };
+  const propsRef = useRef({ turbulence, zoom, fx, fy, travel });
+  propsRef.current = { turbulence, zoom, fx, fy, travel };
+  /* Held in a ref, never in state: this changes every frame the reader
+     scrolls, and a re-render per frame would defeat the whole engine. */
+  const scrollElRef = useRef(scrollRef);
+  scrollElRef.current = scrollRef;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -312,6 +346,8 @@ export function LiquidField({
       zoom: gl.getUniformLocation(prog, "u_zoom"),
       pointer: gl.getUniformLocation(prog, "u_pointer"),
       focus: gl.getUniformLocation(prog, "u_focus"),
+      scroll: gl.getUniformLocation(prog, "u_scroll"),
+      travel: gl.getUniformLocation(prog, "u_travel"),
     };
 
     /* Placeholder texture so the first frames are ground colour, not white. */
@@ -340,6 +376,8 @@ export function LiquidField({
       gl.uniform1f(u.zoom, p0.zoom);
       gl.uniform1f(u.turb, p0.turbulence);
       gl.uniform2f(u.focus, p0.fx, p0.fy);
+      gl.uniform1f(u.travel, p0.travel);
+      gl.uniform1f(u.scroll, 0);
     }
 
     let texReady = false;
@@ -397,11 +435,33 @@ export function LiquidField({
     let last = 0;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    /* --- scroll coupling ---------------------------------------------------
+       Read inside this loop rather than off a scroll listener: the rect is
+       already being read once a frame here, a listener would fire far more
+       often than the compositor can use, and this loop is parked whenever the
+       field is off screen — which is exactly when the value does not matter. */
+    let sp = 0;
+    let spTarget = 0;
+
+    const readScroll = () => {
+      const el = scrollElRef.current?.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      // The band is taller than the viewport; its sticky child pins for the
+      // surplus. Progress is how much of that surplus has been consumed.
+      const span = r.height - window.innerHeight;
+      spTarget = span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
+    };
+
     function draw(time: number) {
       last = time;
       px += (tx - px) * 0.05;
       py += (ty - py) * 0.05;
+      // Smoothed, so a flung scroll arrives as a surge rather than a jump and
+      // the liquid keeps moving for a beat after the wheel stops.
+      sp += (spTarget - sp) * 0.07;
       gl!.uniform1f(u.time, time);
+      gl!.uniform1f(u.scroll, sp);
       gl!.uniform2f(u.pointer, px, py);
       gl!.drawArrays(gl!.TRIANGLES, 0, 3);
     }
@@ -409,13 +469,22 @@ export function LiquidField({
     let start = 0;
     const frame = (now: number) => {
       if (!start) start = now;
+      readScroll();
       draw((now - start) / 1000);
       raf = requestAnimationFrame(frame);
     };
 
     let visible = false;
     const run = () => {
-      if (reduced || raf || !visible || document.hidden) return;
+      if (reduced) {
+        // One frame, at the reader's current position. Reduced motion means
+        // no animation, not a field frozen at a position they scrolled past.
+        readScroll();
+        sp = spTarget;
+        draw(last);
+        return;
+      }
+      if (raf || !visible || document.hidden) return;
       raf = requestAnimationFrame(frame);
     };
     const stop = () => {
@@ -466,9 +535,10 @@ export function LiquidField({
     gl.uniform1f(u.turb, turbulence);
     gl.uniform1f(u.zoom, zoom);
     gl.uniform2f(u.focus, fx, fy);
+    gl.uniform1f(u.travel, travel);
     // A parked loop (off-screen, or reduced motion) needs one frame to show it.
     ctx.redraw();
-  }, [turbulence, zoom, fx, fy]);
+  }, [turbulence, zoom, fx, fy, travel]);
 
   /* The type column must sit on true black — the plate is faded well before
      it reaches the headline, not simply layered under it. */
